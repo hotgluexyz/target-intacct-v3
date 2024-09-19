@@ -181,11 +181,11 @@ class IntacctSink(HotglueSink):
             # Check if status exists
             operation_result = result.get("operation", {}).get("result", {})
             status = operation_result.get("status", "")
-            if status == "failure":
+            if status != "success":
                 # Extract error message
                 error = (
                     operation_result.get("errormessage")
-                    or parsed_response.get("errormessage", "Unknown error")
+                    or parsed_response.get("errormessage", parsed_response)
                 )
                 
                 # Raise appropriate error

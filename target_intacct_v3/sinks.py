@@ -437,21 +437,18 @@ class Bills(IntacctSink):
         """Process the record."""
         state_updates = {}
         if not record:
-            self.logger.warning("Empty record received, skipping.")
-            return
-        
+            raise Exception("Received an empty record, skipping.")
+
         if "error" in record:
-            raise Exception(f"Error in record: {record['error']}")
-        
-        if len(record.values()) < 2:
-            self.logger.warning("Record does not have enough values to process, skipping.")
-            return
+            raise Exception(f"Record error: {record['error']}")
 
         payload, attachments = record.values()
         record_id = payload.get("APBILL",{}).get("RECORDID","")
         # post/update attachments if exist
         supdoc_id = None
-        if attachments and record_id:
+        if attachments:
+            if not record_id:
+                self.logger.error("No RECORDID found in the payload. Skipping sendind attachments as no pk was found to create the folder and/or supdoc.")
             try:
                 supdoc_id = self.post_attachments(attachments, record_id)
                 payload["APBILL"]["SUPDOCID"] = supdoc_id
@@ -526,9 +523,10 @@ class PurchaseInvoices(IntacctSink):
 
             # include locationid at header level
             address = parse_objs(record.get("addresses", "[]"))
+            locationname = None
             if address:
                 address_location = address[0].get("name")
-            locationname = record.get("location") or address_location
+                locationname = record.get("location") or address_location
             if locationname and not payload.get("LOCATIONID"):
                 self.get_locations()
                 try:
@@ -606,7 +604,6 @@ class PurchaseInvoices(IntacctSink):
                     item["DEPARTMENTID"] = IntacctSink.departments.get(
                         department
                     ) or IntacctSink.departments.get(department_name)
-                payload["APBILLITEMS"]["APBILLITEM"].append(item)
 
                 location_name = line.get("location")
                 if location_name and not item["LOCATIONID"]:
@@ -637,6 +634,8 @@ class PurchaseInvoices(IntacctSink):
                         item.update({cf.get("name"): cf.get("value")})
                         for cf in custom_fields
                     ]
+                
+                payload["APBILLITEMS"]["APBILLITEM"].append(item)
 
             # send payload and attachments
             payload = clean_convert(payload)
@@ -652,8 +651,7 @@ class PurchaseInvoices(IntacctSink):
         state_updates = {}
 
         if not record:
-            self.logger.warning("Received an empty record, skipping.")
-            return
+            raise Exception("Received an empty record, skipping.")
 
         if "error" in record:
             raise Exception(f"Record error: {record['error']}")
@@ -662,16 +660,13 @@ class PurchaseInvoices(IntacctSink):
             payload, attachments = record.values()
             record_id = payload["APBILL"].get("RECORDID", None)
         except KeyError as e:
-            self.logger.error(f"Missing expected key in record: {e}")
-            return
-        
-        if not record_id:
-            self.logger.error("No RECORDID found in the payload. Skipping record processing.")
-            return
+            raise KeyError(f"Missing expected key in record: {e}")
         
         # post/update attachments if exist
         supdoc_id = None
         if attachments:
+            if not record_id:
+                self.logger.error("No RECORDID found in the payload. Skipping sendind attachments as no pk was found to create the folder and/or supdoc.")
             try:
                 supdoc_id = self.post_attachments(attachments, record_id)
                 if supdoc_id:
