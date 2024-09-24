@@ -47,15 +47,19 @@ class Suppliers(IntacctSink):
                 "VENDORID"
             )  # VENDORID is required if company does not use document sequencing
             if vendor_id and re.match("^[A-Za-z0-9- ]*$", vendor_id):
+                if len(vendor_id) > 20:
+                    self.logger.info(f"Truncating VENDORID due to size limit (>20 characters): {vendor_id}")
                 payload["VENDORID"] = vendor_id[
                     :20
                 ]  # Intact size limit on VENDORID (20 characters)
 
-                if (payload["VENDORID"] in IntacctSink.vendors.items()) or (
-                    payload["NAME"] in IntacctSink.vendors.keys()
-                ):
+                if (payload["VENDORID"] in IntacctSink.vendors.items()):
                     return {
-                        "error": f"Skipping vendor with VENDORID: {vendor_id} and name {payload['NAME']} due a vendor with same NAME or VENDORID exists."
+                            "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} due a vendor with same VENDORID exists."
+                        }
+                if (payload["NAME"] in IntacctSink.vendors.keys()):
+                    return {
+                        "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} due a vendor with same NAME exists."
                     }
             else:
                 return {
@@ -431,34 +435,49 @@ class Bills(IntacctSink):
 
     def upsert_record(self, record: dict, context: dict) -> None:
         """Process the record."""
-        state_updates = dict()
-        if record.get("error"):
-            raise Exception(record["error"])
-        if record:
-            payload, attachments = record.values()
-            record_id = payload["APBILL"].get("RECORDID")
-            # post/update attachments if exist
-            supdoc_id = None
-            if attachments and record_id:
+        state_updates = {}
+        if not record:
+            raise Exception("Received an empty record, skipping.")
+
+        if "error" in record:
+            raise Exception(f"Record error: {record['error']}")
+
+        payload, attachments = record.values()
+        record_id = payload.get("APBILL",{}).get("RECORDID","")
+        # post/update attachments if exist
+        supdoc_id = None
+        if attachments:
+            if not record_id:
+                self.logger.error("No RECORDID found in the payload. Skipping sendind attachments as no pk was found to create the folder and/or supdoc.")
+            try:
                 supdoc_id = self.post_attachments(attachments, record_id)
                 payload["APBILL"]["SUPDOCID"] = supdoc_id
-            # post/update bill
-            try:
-                # post/update bill
-                action = "update" if payload["APBILL"].get("RECORDNO") else "create"
-                response = self.request_api("POST", request_data={action: payload})
-                id = response["data"]["apbill"]["RECORDNO"]
-                return id, True, state_updates
             except Exception as e:
-                # if bill is new and attachments were sent delete the sent attachments
-                if supdoc_id and action == "create":
+                self.logger.error(f"Failed to post attachments for RECORDID {record_id}: {e}")
+                raise
+
+        # post/update bill
+        try:
+            # post/update bill
+            action = "update" if payload["APBILL"].get("RECORDNO") else "create"
+            response = self.request_api("POST", request_data={action: payload})
+            bill_id = response["data"]["apbill"]["RECORDNO"]
+
+            self.logger.info(f"Successfully {action}d bill with RECORDNO {bill_id}")
+            return bill_id, True, state_updates
+        except Exception as e:
+            self.logger.error(f"Failed to {action} bill with RECORDID {record_id}: {e}")
+
+            # if bill is new and attachments were sent delete the sent attachments
+            if supdoc_id and action == "create":
+                try:
                     self.logger.info(
-                        f"Posting bill with RECORDID {record_id} has failed due to {e.__repr__}, deleting sent attachments..."
+                        f"Deleting attachments for failed bill creation with RECORDID {record_id}..."
                     )
-                    self.request_api(
-                        "POST", request_data={"delete_supdoc": {"@key": supdoc_id}}
-                    )
-                raise Exception(e.__repr__())
+                    self.request_api("POST", request_data={"delete_supdoc": {"@key": supdoc_id}})
+                except Exception as delete_error:
+                    self.logger.error(f"Failed to delete attachments with SUPDOCID {supdoc_id}: {delete_error}")
+            raise Exception(f"Failed to {action} bill: {e}")
 
 
 class PurchaseInvoices(IntacctSink):
@@ -504,9 +523,10 @@ class PurchaseInvoices(IntacctSink):
 
             # include locationid at header level
             address = parse_objs(record.get("addresses", "[]"))
+            locationname = None
             if address:
                 address_location = address[0].get("name")
-            locationname = record.get("location") or address_location
+                locationname = record.get("location") or address_location
             if locationname and not payload.get("LOCATIONID"):
                 self.get_locations()
                 try:
@@ -584,7 +604,6 @@ class PurchaseInvoices(IntacctSink):
                     item["DEPARTMENTID"] = IntacctSink.departments.get(
                         department
                     ) or IntacctSink.departments.get(department_name)
-                payload["APBILLITEMS"]["APBILLITEM"].append(item)
 
                 location_name = line.get("location")
                 if location_name and not item["LOCATIONID"]:
@@ -615,6 +634,8 @@ class PurchaseInvoices(IntacctSink):
                         item.update({cf.get("name"): cf.get("value")})
                         for cf in custom_fields
                     ]
+                
+                payload["APBILLITEMS"]["APBILLITEM"].append(item)
 
             # send payload and attachments
             payload = clean_convert(payload)
@@ -627,31 +648,51 @@ class PurchaseInvoices(IntacctSink):
 
     def upsert_record(self, record: dict, context: dict) -> None:
         """Process the record."""
-        state_updates = dict()
-        if record.get("error"):
-            raise Exception(record["error"])
-        if record:
+        state_updates = {}
+
+        if not record:
+            raise Exception("Received an empty record, skipping.")
+
+        if "error" in record:
+            raise Exception(f"Record error: {record['error']}")
+
+        try:
             payload, attachments = record.values()
-            record_id = payload["APBILL"].get("RECORDID")
-            # post/update attachments if exist
-            supdoc_id = None
-            if attachments and record_id:
-                supdoc_id = self.post_attachments(attachments, record_id)
-                payload["APBILL"]["SUPDOCID"] = supdoc_id
-            # post/update bill
+            record_id = payload["APBILL"].get("RECORDID", None)
+        except KeyError as e:
+            raise KeyError(f"Missing expected key in record: {e}")
+        
+        # post/update attachments if exist
+        supdoc_id = None
+        if attachments:
+            if not record_id:
+                self.logger.error("No RECORDID found in the payload. Skipping sendind attachments as no pk was found to create the folder and/or supdoc.")
             try:
-                # post/update bill
-                action = "update" if payload["APBILL"].get("RECORDNO") else "create"
-                response = self.request_api("POST", request_data={action: payload})
-                id = response["data"]["apbill"]["RECORDNO"]
-                return id, True, state_updates
+                supdoc_id = self.post_attachments(attachments, record_id)
+                if supdoc_id:
+                    payload["APBILL"]["SUPDOCID"] = supdoc_id
             except Exception as e:
-                # if bill is new and attachments were sent delete the sent attachments
-                if supdoc_id and action == "create":
-                    self.logger.info(
-                        f"Posting PurchaseInvoice with RECORDID {record_id} has failed due to {e.__repr__}, deleting sent attachments..."
-                    )
-                    self.request_api(
-                        "POST", request_data={"delete_supdoc": {"@key": supdoc_id}}
-                    )
-                raise Exception(e.__repr__())
+                self.logger.error(f"Failed to post attachments for RECORDID {record_id}: {e}")
+                raise
+
+        # post/update bill
+        try:
+            action = "update" if payload["APBILL"].get("RECORDNO") else "create"
+            response = self.request_api("POST", request_data={action: payload})
+            bill_id = response["data"]["apbill"]["RECORDNO"]
+
+            # Step 3: Log success and return the bill ID, success status, and state updates
+            self.logger.info(f"Successfully {action}d bill with RECORDNO {bill_id}")
+            return bill_id, True, state_updates
+        except Exception as e:
+            self.logger.error(f"Failed to {action} bill with RECORDID {record_id}: {e}")
+
+            # Step 4: If bill creation failed and attachments were sent, delete the attachments
+            if supdoc_id and action == "create":
+                try:
+                    self.logger.info(f"Deleting attachments for failed bill creation with RECORDID {record_id}...")
+                    self.request_api("POST", request_data={"delete_supdoc": {"@key": supdoc_id}})
+                except Exception as delete_error:
+                    self.logger.error(f"Failed to delete attachments with SUPDOCID {supdoc_id}: {delete_error}")
+            
+            raise Exception(f"Failed to {action} bill: {e}")

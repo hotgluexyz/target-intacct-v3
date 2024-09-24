@@ -11,7 +11,7 @@ from pendulum import parse
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from target_hotglue.client import HotglueSink
 
-from target_intacct_v3.util import *
+from target_intacct_v3.util import dictify, parse_objs
 
 
 class IntacctSink(HotglueSink):
@@ -24,12 +24,61 @@ class IntacctSink(HotglueSink):
     classes = None
     departments = None
     previous_stream = None
+    controlid_list = []
 
     @property
     def http_headers(self) -> dict:
         """Return the http headers needed."""
         headers = {"content-type": "application/xml"}
         return headers
+    
+    @classmethod
+    def register_controlid(cls, controlid):
+        cls.controlid_list.append(controlid)
+
+    @classmethod
+    def check_request_body_duplicity(cls, controlid):
+        return controlid in cls.controlid_list
+    
+    def get_request_body(self, sender_id, sender_password, login_payload = {}, content = {}, operation = None):
+        request_body = {
+                "request": {
+                    "control": {
+                        "senderid": sender_id,
+                        "password": sender_password,
+                        "controlid": None,
+                        "uniqueid": False,
+                        "dtdversion": 3.0,
+                        "includewhitespace": False,
+                    }
+                }
+            }
+        if operation == 'login':
+            request_body["request"]["operation"] = {
+                        "authentication": {"login": login_payload},
+                        "content": {
+                            "function": {
+                                "@controlid": str(uuid.uuid4()),
+                                "getAPISession": None,
+                            }
+                        },
+                    }
+        elif operation == "send_content":
+            request_body["request"]["operation"] = {
+                    "authentication": {"sessionid": self._target.session_id},
+                    "content": content,
+                }
+        else:
+            raise Exception(f"Invalid operation given when requesting the request body: {operation}")
+        
+        controlid = hash(str(request_body))
+        if self.check_request_body_duplicity(controlid):
+            raise Exception(f"Request body duplicity identified: {request_body}")
+        
+        request_body["request"]["control"]["controlid"] = controlid
+        self.register_controlid(controlid)
+
+        return request_body
 
     def login(self):
         user_id = self.config.get("user_id")
@@ -38,7 +87,7 @@ class IntacctSink(HotglueSink):
         location_id = self.config.get("location_id")
         sender_id = self.config.get("sender_id")
         sender_password = self.config.get("sender_password")
-        login = {
+        login_payload = {
             "userid": user_id,
             "companyid": company_id,
             "password": user_password,
@@ -52,43 +101,31 @@ class IntacctSink(HotglueSink):
             and location_id
             and self.name not in ["Suppliers"]
         ):
-            login["locationid"] = location_id
+            login_payload["locationid"] = location_id
 
-        timestamp = dt.datetime.now()
-        dict_body = {
-            "request": {
-                "control": {
-                    "senderid": sender_id,
-                    "password": sender_password,
-                    "controlid": timestamp,
-                    "uniqueid": False,
-                    "dtdversion": 3.0,
-                    "includewhitespace": False,
-                },
-                "operation": {
-                    "authentication": {"login": login},
-                    "content": {
-                        "function": {
-                            "@controlid": str(uuid.uuid4()),
-                            "getAPISession": None,
-                        }
-                    },
-                },
-            }
-        }
+        request_body = self.get_request_body(sender_id, sender_password, login_payload= login_payload, operation='login')
 
-        body = xmltodict.unparse(dict_body).encode("utf-8")
-        response = requests.post(self.base_url, headers=self.http_headers, data=body)
-        self.validate_response(response)
-        res_json = self.parse_response(response)["response"]["operation"]
-        if res_json["authentication"]["status"] == "success":
-            session_details = res_json["result"]["data"]["api"]
-            self._target.session_id = session_details["sessionid"]
-            try:
-                session_timeout = parse(res_json["authentication"]["sessiontimeout"])
-            except:
-                session_timeout = dt.datetime.utcnow() + dt.timedelta(hours=1)
-            self._target.session_timeout = session_timeout
+        xml_request_body = xmltodict.unparse(request_body).encode("utf-8")
+        try:
+            response = requests.post(self.base_url, headers=self.http_headers, data=xml_request_body)
+            self.validate_response(response)
+            res_json = self.parse_response(response)["response"]["operation"]
+            if res_json["authentication"]["status"] == "success":
+                session_details = res_json["result"]["data"]["api"]
+                self._target.session_id = session_details["sessionid"]
+                self._target.session_timeout = self._get_session_timeout(res_json)
+
+        except requests.RequestException as e:
+            raise FatalAPIError(f"Login request failed: {e.__repr__()}")
+        except KeyError as e:
+            raise FatalAPIError(f"Unexpected response structure: {e.__repr__()}")
+
+    def _get_session_timeout(self, response_json) -> dt.datetime:
+        """Extract session timeout from the response."""
+        try:
+            return parse(response_json["authentication"]["sessiontimeout"])
+        except (KeyError, ValueError):
+            return dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=1)
 
     def parse_response(self, response):
         parsed_xml = xmltodict.parse(response.text)
@@ -96,7 +133,7 @@ class IntacctSink(HotglueSink):
         return parsed_response
 
     def is_session_valid(self):
-        now = round(dt.datetime.utcnow().timestamp())
+        now = round(dt.datetime.now(dt.timezone.utc).timestamp())
         session_timeout = self._target.session_timeout
         if not self._target.session_id:
             return False
@@ -107,36 +144,24 @@ class IntacctSink(HotglueSink):
         return not ((session_timeout - now) < 120)
 
     def format_payload(self, payload):
-        timestamp = dt.datetime.now()
-
         content = {"function": {"@controlid": str(uuid.uuid4())}}
         content["function"].update(payload)
 
-        dict_body = {
-            "request": {
-                "control": {
-                    "senderid": self.config.get("sender_id"),
-                    "password": self.config.get("sender_password"),
-                    "controlid": timestamp,
-                    "uniqueid": False,
-                    "dtdversion": 3.0,
-                    "includewhitespace": False,
-                },
-                "operation": {
-                    "authentication": {"sessionid": self._target.session_id},
-                    "content": content,
-                },
-            }
-        }
+        dict_body = self.get_request_body(self.config.get("sender_id"),self.config.get("sender_password"), content= content, operation='send_content')
         # transform payload to xml
         body = xmltodict.unparse(dict_body).encode("utf-8")
         return body
 
     def request_api(
-        self, http_method, endpoint=None, params={}, request_data=None, headers={}
+        self, http_method, endpoint=None, params=None, request_data=None, headers=None
     ):
         """Request records from REST endpoint(s), returning response records."""
         # check if session is still valid before sending any request
+        if params is None:
+            params = {}
+        if headers is None:
+            headers = {}
+
         if not self.is_session_valid():
             self.login()
         # wrap and format payload
@@ -147,19 +172,30 @@ class IntacctSink(HotglueSink):
 
     def validate_response(self, response) -> None:
         """Validate HTTP response."""
-        # parse response
-        parsed_xml = xmltodict.parse(response.text)
-        parsed_response = json.loads(json.dumps(parsed_xml))
-        result = parsed_response["response"]
-        success = result["operation"]["result"]["status"]
-        if success == "failure":
-            error = result.get("operation", {}).get("result", {}).get(
-                "errormessage"
-            ) or parsed_response.get("errormessage")
-            if response.status_code in [429] or 500 <= response.status_code < 600:
-                raise RetriableAPIError(error)
-            else:
-                raise FatalAPIError(error)
+        try:
+            # Parse response
+            parsed_response = self.parse_response(response)
+
+            result = parsed_response.get("response", {})
+
+            # Check if status exists
+            operation_result = result.get("operation", {}).get("result", {})
+            status = operation_result.get("status", "")
+            if status != "success":
+                # Extract error message
+                error = (
+                    operation_result.get("errormessage")
+                    or parsed_response.get("errormessage", parsed_response)
+                )
+                
+                # Raise appropriate error
+                if response.status_code == 429 or 500 <= response.status_code < 600:
+                    raise RetriableAPIError(error)
+                else:
+                    raise FatalAPIError(error)
+
+        except (KeyError, ValueError, TypeError) as e:
+            raise FatalAPIError(f"Failed to parse response: {e.__repr__()}")
 
     @backoff.on_exception(
         backoff.expo,
@@ -168,39 +204,54 @@ class IntacctSink(HotglueSink):
         factor=2,
     )
     def _request(
-        self, http_method, endpoint, params={}, request_data=None, headers={}
+        self, http_method, endpoint, params=None, request_data=None, headers=None
     ) -> requests.PreparedRequest:
         """Prepare a request object."""
+        if params is None:
+            params = {}
+        if headers is None:
+            headers = {}
+
         url = self.url(endpoint)
         headers.update(self.default_headers)
         params.update(self.params)
 
         if "attachmentdata" not in str(request_data):
-            self.logger.info(f"Making request with payload {request_data}")
+            self.logger.info(f"Making request to {url} with payload: {request_data}")
 
-        response = requests.request(
-            method=http_method,
-            url=url,
-            params=params,
-            headers=headers,
-            data=request_data,
-        )
-        self.validate_response(response)
-        # parse response
-        parsed_xml = xmltodict.parse(response.text)
-        parsed_response = json.loads(json.dumps(parsed_xml))
-        # validate response
-        parsed_response = parsed_response["response"]["operation"]["result"]
-        self.logger.info(f"Succesful request with response {parsed_response}")
-        return parsed_response
+        try:
+            response = requests.request(
+                method=http_method,
+                url=url,
+                params=params,
+                headers=headers,
+                data=request_data,
+            )
+            self.validate_response(response)
+            # parse response
+            parsed_response = self.parse_response(response)
 
-    def get_records(self, intacct_object, fields, filter={}):
+            # validate response
+            result = parsed_response["response"]["operation"]["result"]
+            self.logger.info(f"Succesful request to {url} with response: {result}")
+            return result
+        
+        except requests.RequestException as e:
+            self.logger.error(f"Request to {url} failed: {e.__repr__()}")
+            raise FatalAPIError(f"HTTP request failed: {e.__repr__()}")
+        except KeyError as e:
+            self.logger.error(f"Failed to parse response from {url}: {e.__repr__()}")
+            raise FatalAPIError(f"Malformed response: {e.__repr__()}")
+
+    def get_records(self, intacct_object, fields, filter=None):
+        if filter is None:
+            filter = {}
+ 
         pagesize = 1000
         offset = 0
-        paginate = True
-        count = None
         total_intacct_objects = []
-        while paginate:
+
+        while True:
             data = {
                 "query": {
                     "object": intacct_object,
@@ -213,17 +264,24 @@ class IntacctSink(HotglueSink):
             if filter:
                 data["query"].update(filter)
 
-            response = self.request_api("POST", request_data=data)
-            count = int(response.get("data", {}).get("@count", 0))
-            intacct_objects = response.get("data", {}).get(intacct_object, [])
-            # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
-            if isinstance(intacct_objects, dict):
-                intacct_objects = [intacct_objects]
+            try:
+                response = self.request_api("POST", request_data=data)
+                count = int(response.get("data", {}).get("@count", 0))
+                intacct_objects = response.get("data", {}).get(intacct_object, [])
+                # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
+                if isinstance(intacct_objects, dict):
+                    intacct_objects = [intacct_objects]
 
-            total_intacct_objects = total_intacct_objects + intacct_objects
-            offset = offset + pagesize
-            if offset > count:
-                paginate = False
+                total_intacct_objects.extend(intacct_objects)
+
+                if offset + pagesize >= count:
+                    break
+
+                offset += pagesize
+            except (KeyError, ValueError, TypeError) as e:
+                self.logger.error(f"Failed to retrieve records: {e.__repr__()}")
+                raise FatalAPIError(f"Error while fetching records: {e.__repr__()}")
+        
         return total_intacct_objects
 
     def get_vendors(self):
@@ -275,51 +333,60 @@ class IntacctSink(HotglueSink):
         return IntacctSink.items
 
     def prepare_attachment_payload(
-        self, attachments, record_id, existing_attachments={}
+        self, attachments, record_id, existing_attachments=None
     ):
-        supdoc_id = str(record_id)[-20:].strip("-")  # supdocid only allows 20 chars
+        if existing_attachments is None:
+            existing_attachments = {"names": [], "content": []}
+        
+        supdoc_id = str(record_id).replace("-","")[-20:].strip("-")  # supdocid only allows 20 chars
+        self.logger.info(f"Transforming record_id: {record_id} into supdoc_id: {supdoc_id}")
         if isinstance(attachments, str):
             attachments = parse_objs(attachments)
 
         for attachment in attachments:
             url = attachment.get("url")
             if url:
-                response = requests.get(url)
-                data = base64.b64encode(response.content)
-                data = data.decode()
-                attachment["data"] = data
-            else:
-                att_path = f"{self.config.get('input_path')}/{attachment.get('id')}_{attachment.get('name')}"
-                with open(att_path, "rb") as attach_file:
-                    data = base64.b64encode(attach_file.read()).decode()
+                try:
+                    response = requests.get(url)
+                    data = base64.b64encode(response.content)
+                    data = data.decode()
                     attachment["data"] = data
+                except requests.RequestException as e:
+                    self.logger.error(f"Failed to fetch attachment from {url}: {e.__repr__()}")
+                    continue
+            else:
+                try:
+                    att_path = f"{self.config.get('input_path')}/{attachment.get('id')}_{attachment.get('name')}"
+                    with open(att_path, "rb") as attach_file:
+                        data = base64.b64encode(attach_file.read()).decode()
+                        attachment["data"] = data
+                except FileNotFoundError as e:
+                    self.logger.error(f"File not found for attachment: {att_path}. Error: {e.__repr__()}")
+                    continue
+                except OSError as e:
+                    self.logger.error(f"Failed to read file {att_path}. Error: {e.__repr__()}")
+                    continue
 
         filtered_attachments = []
         for att in attachments:
+            att_name = f'{att.get("id")}_{att.get("name")}' if att.get("id") else att.get("name")
             should_post = False
+
             if att.get("id"):
-                att_name = f'{att.get("id")}_{att.get("name")}'
                 # check if attachment content was previously posted (precoro)
-                should_post = att.get("data") not in existing_attachments.get(
-                    "content", []
-                )
+                should_post = att.get("data") not in existing_attachments.get("content", [])
             else:
-                att_name = att.get("name")
                 # check if attachment name was previously posted
                 should_post = att_name not in existing_attachments.get("names", [])
 
             if should_post:
-                filtered_attachments.append(
-                    {
+                filtered_attachments.append({
                         "attachmentname": att_name,
                         "attachmenttype": Path(att_name).suffix,
                         "attachmentdata": att.get("data"),
-                    }
-                )
+                })
             else:
-                self.logger.info(
-                    f"Attachment '{att_name}' skipped because attachment with the same name or content was found "
-                )
+                self.logger.info(f"Skipping attachment '{att_name}' (duplicate name or content found)")
 
         if filtered_attachments:
             action = "create" if not existing_attachments else "update"
@@ -334,48 +401,56 @@ class IntacctSink(HotglueSink):
 
     def post_attachments(self, attachments, record_id):
         # 1. check if supdoc exists and get existing attachments
-        check_supdoc = {"get": {"@object": "supdoc", "@key": record_id}}
-        supdoc = self.request_api("POST", request_data=check_supdoc)
-        supdoc = (supdoc.get("data") or {}).get("supdoc")
+        try:
+            check_supdoc = {"get": {"@object": "supdoc", "@key": record_id}}
+            supdoc_response = self.request_api("POST", request_data=check_supdoc)
+            supdoc = (supdoc_response.get("data") or {}).get("supdoc")
+        except Exception as e:
+            self.logger.error(f"Failed to check existing supdoc for record {record_id}: {e.__repr__()}")
+            return
+        
 
         # getting existing attachments
-        existing_attachments = {}
+        existing_attachments = {"names": [], "content": []}
         if supdoc:
-            self.logger.info(
-                f"supdoc with id {record_id} already exists, updating existing supdoc"
-            )
-            ex_attachments = supdoc.get("attachments", {}).get("attachment")
-            # getting a list of existing attachments to avoid duplicates
-            if isinstance(ex_attachments, dict):
-                existing_attachments["names"] = [ex_attachments.get("attachmentname")]
-                existing_attachments["content"] = ex_attachments.get("attachmentdata")
-            elif isinstance(attachments, list):
-                existing_attachments["content"] = [
-                    att.get("attachmentdata") for att in ex_attachments
-                ]
-                existing_attachments["names"] = [
-                    att.get("attachmentname") for att in ex_attachments
-                ]
+            self.logger.info(f"Supdoc with ID {record_id} already exists, updating it.")
+            existing_attachments_data = supdoc.get("attachments", {}).get("attachment")
+            if isinstance(existing_attachments_data, dict):
+                existing_attachments["names"] = [existing_attachments_data.get("attachmentname")]
+                existing_attachments["content"] = existing_attachments_data.get("attachmentdata")
+            elif isinstance(existing_attachments_data, list):
+                existing_attachments["names"] = [att.get("attachmentname") for att in existing_attachments_data]
+                existing_attachments["content"] = [att.get("attachmentdata") for att in existing_attachments_data]
 
         # prepare attachments payload
-        att_payload = self.prepare_attachment_payload(
-            attachments, record_id, existing_attachments
-        )
+        try:
+            att_payload = self.prepare_attachment_payload(attachments, record_id, existing_attachments)
+        except Exception as e:
+            self.logger.error(f"Failed to prepare attachment payload for record {record_id}: {e.__repr__()}")
+            return
 
         if att_payload:
-            # 1. check if folder exists, create if not
-            check_folder = {"get": {"@object": "supdocfolder", "@key": record_id}}
-            folder = self.request_api("POST", request_data=check_folder)
+            try:
+                # Check if the folder exists
+                check_folder = {"get": {"@object": "supdocfolder", "@key": record_id}}
+                folder_response = self.request_api("POST", request_data=check_folder)
+                folder_exists = folder_response.get("data", {}).get("supdocfolder")
 
-            if folder.get("data", {}).get("supdocfolder"):
-                self.logger.info(f"Folder with name {record_id} already exists")
-            else:
-                # if folder doesn't exist create folder
-                folder_payload = {
-                    "create_supdocfolder": {"supdocfoldername": record_id}
-                }
-                self.request_api("POST", request_data=folder_payload)
+                if folder_exists:
+                    self.logger.info(f"Folder with name {record_id} already exists.")
+                else:
+                    # Create folder if it doesn't exist
+                    folder_payload = {"create_supdocfolder": {"supdocfoldername": record_id}}
+                    self.request_api("POST", request_data=folder_payload)
+                    self.logger.info(f"Created folder with name {record_id}.")
 
-            # 2. post attachments
-            self.request_api("POST", request_data=att_payload)
-            return record_id
+                # Post the attachments
+                self.request_api("POST", request_data=att_payload)
+                self.logger.info(f"Attachments for record {record_id} have been posted successfully.")
+                return record_id
+            except Exception as e:
+                self.logger.error(f"Failed to post attachments or folder for record {record_id}: {e.__repr__()}")
+                return
+
+        self.logger.info(f"No new attachments to post for record {record_id}.")
+        return
