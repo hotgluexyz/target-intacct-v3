@@ -23,6 +23,7 @@ class IntacctSink(HotglueSink):
     projects = None
     classes = None
     departments = None
+    items = None
     previous_stream = None
     controlid_list = []
 
