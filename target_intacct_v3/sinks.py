@@ -390,7 +390,7 @@ class Bills(IntacctSink):
 
                 if line.get("vendorName") and not item.get("VENDORID"):
                     self.get_vendors()
-                    item["VENDORID"] = IntacctSink.vendors[payload["VENDORNAME"]]
+                    item["VENDORID"] = IntacctSink.vendors[line["vendorName"]]
 
                 class_name = line.get("className")
                 if class_name and not item.get("CLASSID"):
@@ -567,12 +567,12 @@ class PurchaseInvoices(IntacctSink):
                     "LOCATIONID": payload.get("LOCATIONID"),  # same as header level
                     "CLASSID": line.get("classId"),
                     "ACCOUNTNO": line.get("accountNumber"),
-                    "VENDORID": line.get("supplierNumber"),
+                    "VENDORID": line.get("supplierNumber", line.get("supplierCode")),
                 }
 
                 if line.get("supplierName") and not item.get("VENDORID"):
                     self.get_vendors()
-                    item["VENDORID"] = IntacctSink.vendors[payload["VENDORNAME"]]
+                    item["VENDORID"] = IntacctSink.vendors[line["supplierName"]]
 
                 class_name = line.get("className")
                 if class_name and not item.get("CLASSID"):
