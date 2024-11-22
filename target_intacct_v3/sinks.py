@@ -325,6 +325,16 @@ class Bills(IntacctSink):
                 "LOCATIONID": record.get("locationId"),
             }
 
+            # validate RECORDID
+            if payload.get("RECORDID"):
+                invalid_chars = r"[\"\'&<>#?]"  # characters not allowed for RECORDID [&, <, >, #, ?]
+                is_id_valid = not bool(re.search(invalid_chars, (payload.get("RECORDID"))))
+
+                if not is_id_valid:
+                    raise Exception(
+                        f"RECORDID '{payload.get('RECORDID')}' contains one or more invalid characters '&,<,>,#,?'. Please provide a RECORDID that does not include these characters."
+                    )
+
             # check if bill exists
             record_no = self.get_records(
                 "APBILL",
@@ -504,6 +514,16 @@ class PurchaseInvoices(IntacctSink):
                 "DOCNUMBER": record.get("number"),
                 "DESCRIPTION": record.get("description"),
             }
+
+            if payload.get("RECORDID"):
+                # validate RECORDID
+                invalid_chars = r"[\"\'&<>#?]"  # characters not allowed for RECORDID [&, <, >, #, ?]
+                is_id_valid = not bool(re.search(invalid_chars, payload.get("RECORDID")))
+
+                if not is_id_valid:
+                    raise Exception(
+                        f"RECORDID '{payload.get('RECORDID')}' contains one or more invalid characters '&,<,>,#,?'. Please provide a RECORDID that does not include these characters."
+                    )
 
             # check if bill exists
             record_no = self.get_records(
