@@ -267,7 +267,7 @@ class IntacctSink(HotglueSink):
 
             try:
                 response = self.request_api("POST", request_data=data)
-                count = int(response.get("data", {}).get("@count", 0))
+                count = int(response.get("data", {}).get("@totalcount", 0))
                 intacct_objects = response.get("data", {}).get(intacct_object, [])
                 # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
                 if isinstance(intacct_objects, dict):
