@@ -6,6 +6,7 @@ import re
 from target_intacct_v3.client import IntacctSink
 from target_intacct_v3.util import *
 
+from datetime import datetime
 
 class Suppliers(IntacctSink):
     """IntacctV3 target sink class."""
@@ -716,3 +717,77 @@ class PurchaseInvoices(IntacctSink):
                     self.logger.error(f"Failed to delete attachments with SUPDOCID {supdoc_id}: {delete_error}")
             
             raise Exception(f"Failed to {action} bill: {e}")
+
+
+class BillPayment(IntacctSink):
+    """IntacctV3 target sink class."""
+
+    name = "BillPayment"
+
+
+    def preprocess_record(self, record: dict, context: dict) -> dict:
+        if not record.get("billId"):
+            return {"error": "billId is a required field"}
+
+        # Get the bill with the id
+        bills = self.get_records("APBILL", [
+            "RECORDNO",
+            "VENDORNAME",
+            "VENDORID",
+            "RECORDID",
+            "DOCNUMBER",
+            "CURRENCY",
+            "TRX_TOTALDUE",
+        ], filter={"filter": {"equalto": {"field": "RECORDNO", "value": f"{record['billId']}"}}})
+
+        if not bills:
+            raise Exception(f"No bill with id={record['billId']} found.")
+
+        # get the bill
+        bill = bills[0]
+
+        # If no payment date is set, we fall back to today
+        payment_date = record.get("paymentDate")
+
+        if payment_date is None:
+            payment_date = datetime.today().strftime("%m/%d/%Y")
+
+        if not record.get("bankAccountName"):
+            return {"error": "bankAccountName is a required field"}
+
+        bank_name = record["bankAccountName"]
+        # TODO: not sure why we need this
+        if "--" in bank_name:
+            bank_name = bank_name.split("--")[0]
+
+        if not record.get("paymentMethod"):
+            return {"error": "paymentMethod is a required field"}
+
+        payload = {
+            "FINANCIALENTITY": bank_name,
+            "PAYMENTMETHOD": record["paymentMethod"],
+            "VENDORID": record.get("vendorId") or bill["VENDORID"],
+            "CURRENCY": record.get("currency") or bill["CURRENCY"],
+            "PAYMENTDATE": payment_date,
+            "APPYMTDETAILS": {
+                "APPYMTDETAIL": {
+                    "RECORDKEY": bill["RECORDNO"],
+                    "TRX_PAYMENTAMOUNT": record.get("amount") or bill["TRX_TOTALDUE"],
+                }
+            },
+        }
+
+        return {"APPYMT": payload}
+
+
+    def upsert_record(self, record: dict, context: dict) -> None:
+        """Process the record."""
+        state_updates = dict()
+        if record.get("error"):
+            raise Exception(record["error"])
+
+        if record:
+            response = self.request_api("POST", request_data={"create": record})
+            id = response["data"]["appymt"]["RECORDNO"]
+            return id, True, state_updates
+
