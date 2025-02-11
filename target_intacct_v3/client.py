@@ -390,7 +390,7 @@ class IntacctSink(HotglueSink):
                 self.logger.info(f"Skipping attachment '{att_name}' (duplicate name or content found)")
 
         if filtered_attachments:
-            action = "create" if not existing_attachments else "update"
+            action = "create" if not existing_attachments.get("names") else "update"
             return {
                 f"{action}_supdoc": {
                     "supdocid": supdoc_id,  # only 20 chars allowed
@@ -450,8 +450,7 @@ class IntacctSink(HotglueSink):
                 self.logger.info(f"Attachments for record {record_id} have been posted successfully.")
                 return record_id
             except Exception as e:
-                self.logger.error(f"Failed to post attachments or folder for record {record_id}: {e.__repr__()}")
-                return
+                raise Exception(f"Failed to post attachments or folder for record {record_id}: {e.__repr__()}")
 
         self.logger.info(f"No new attachments to post for record {record_id}.")
         return
