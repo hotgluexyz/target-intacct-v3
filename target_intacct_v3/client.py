@@ -395,7 +395,7 @@ class IntacctSink(HotglueSink):
                 f"{action}_supdoc": {
                     "supdocid": supdoc_id,  # only 20 chars allowed
                     "supdocname": record_id,
-                    "supdocfoldername": record_id,  # we name the folder the same as the supdoc for easy correlation
+                    "supdocfoldername": record_id,  # we use the actual record id as foldername
                     "attachments": {"attachment": filtered_attachments},
                 }
             }

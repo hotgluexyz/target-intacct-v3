@@ -790,4 +790,3 @@ class BillPayment(IntacctSink):
             response = self.request_api("POST", request_data={"create": record})
             id = response["data"]["appymt"]["RECORDNO"]
             return id, True, state_updates
-
