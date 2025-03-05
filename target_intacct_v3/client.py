@@ -403,7 +403,8 @@ class IntacctSink(HotglueSink):
     def post_attachments(self, attachments, record_id):
         # 1. check if supdoc exists and get existing attachments
         try:
-            check_supdoc = {"get": {"@object": "supdoc", "@key": record_id}}
+            supdoc_id = str(record_id).replace("-","")[-20:].strip("-")  # supdocid only allows 20 chars
+            check_supdoc = {"get": {"@object": "supdoc", "@key": supdoc_id}}
             supdoc_response = self.request_api("POST", request_data=check_supdoc)
             supdoc = (supdoc_response.get("data") or {}).get("supdoc")
         except Exception as e:
