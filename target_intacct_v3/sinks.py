@@ -337,7 +337,7 @@ class Bills(IntacctSink):
                     )
 
             # check if bill exists
-            record_no = self.get_records(
+            existing_bill = self.get_records(
                 "APBILL",
                 fields=["RECORDNO"],
                 filter={
@@ -349,8 +349,8 @@ class Bills(IntacctSink):
                     }
                 },
             )
-            if record_no:
-                payload["RECORDNO"] = record_no[0].get("RECORDNO")
+            if existing_bill:
+                payload["RECORDNO"] = existing_bill[0].get("RECORDNO")
 
             # include locationid at header level
             locationname = record.get("location")
@@ -497,6 +497,7 @@ class PurchaseInvoices(IntacctSink):
     name = "PurchaseInvoices"
 
     def preprocess_record(self, record: dict, context: dict) -> dict:
+        bill_state = None
         try:
             # Map bill
             payload = {
@@ -508,7 +509,6 @@ class PurchaseInvoices(IntacctSink):
                 "RECPAYMENTDATE": record.get("paidDate"),
                 "WHENCREATED": record.get("createdAt", "").split("T")[0],
                 "WHENPOSTED": record.get("issueDate"),
-                "APBILLITEMS": {"APBILLITEM": []},
                 "VENDORID": record.get("supplierCode", record.get("supplierNumber")),
                 "RECORDID": record.get("invoiceNumber"),
                 "LOCATIONID": record.get("locationId"),
@@ -527,9 +527,9 @@ class PurchaseInvoices(IntacctSink):
                     )
 
             # check if bill exists
-            record_no = self.get_records(
+            existing_bill = self.get_records(
                 "APBILL",
-                fields=["RECORDNO"],
+                fields=["RECORDNO", "STATE"],
                 filter={
                     "filter": {
                         "equalto": {
@@ -539,8 +539,9 @@ class PurchaseInvoices(IntacctSink):
                     }
                 },
             )
-            if record_no:
-                payload["RECORDNO"] = record_no[0].get("RECORDNO")
+            if existing_bill:
+                payload["RECORDNO"] = existing_bill[0].get("RECORDNO")
+                bill_state = existing_bill[0].get("STATE")
 
             # include locationid at header level
             address = parse_objs(record.get("addresses", "[]"))
@@ -577,86 +578,92 @@ class PurchaseInvoices(IntacctSink):
                     return {
                         "error": f"ERROR: VENDORID {vendor_number} not found for this account."
                     }
-
-            lines = parse_objs(record.get("lineItems", "[]"))
-            for line in lines:
-                item = {
-                    "PROJECTID": line.get("projectId"),
-                    "TRX_AMOUNT": line.get("totalPrice", line.get("amount")),
-                    "ACCOUNTNAME": line.get("accountName"),
-                    "ENTRYDESCRIPTION": line.get("description"),
-                    "LOCATIONID": payload.get("LOCATIONID"),  # same as header level
-                    "CLASSID": line.get("classId"),
-                    "ACCOUNTNO": line.get("accountNumber"),
-                    "VENDORID": line.get("supplierNumber", line.get("supplierCode")),
-                }
-
-                if line.get("supplierName") and not item.get("VENDORID"):
-                    self.get_vendors()
-                    item["VENDORID"] = IntacctSink.vendors[line["supplierName"]]
-
-                class_name = line.get("className")
-                if class_name and not item.get("CLASSID"):
-                    self.get_classes()
-                    try:
-                        item["CLASSID"] = IntacctSink.classes[class_name]
-                    except:
-                        self.logger.info(
-                            f"Skipping class due Class {class_name} does not exist. Did you mean any of these: {list(IntacctSink.classes.keys())}?"
-                        )
-
-                self.get_accounts()
-                account_name = line.get("accountName")
-                if (
-                    account_name
-                    and item.get("ACCOUNTNO") not in IntacctSink.accounts.keys()
-                ):
-                    item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
-                if not item.get("ACCOUNTNO"):
-                    return {
-                        "error": f"ERROR: ACCOUNTNAME or ACCOUNTNO not found for this tenant in item {item}. \n Intaccts Requires an ACCOUNTNO associated with each line item"
+                    
+            if bill_state == "Paid":
+                self.logger.info("Bill is already paid. Skipping the line items.")
+            else:
+                bill_items = []
+                lines = parse_objs(record.get("lineItems", "[]"))
+                for line in lines:
+                    item = {
+                        "PROJECTID": line.get("projectId"),
+                        "TRX_AMOUNT": line.get("totalPrice", line.get("amount")),
+                        "ACCOUNTNAME": line.get("accountName"),
+                        "ENTRYDESCRIPTION": line.get("description"),
+                        "LOCATIONID": payload.get("LOCATIONID"),  # same as header level
+                        "CLASSID": line.get("classId"),
+                        "ACCOUNTNO": line.get("accountNumber"),
+                        "VENDORID": line.get("supplierNumber", line.get("supplierCode")),
                     }
 
-                # departmentid is optional
-                department = line.get("department")
-                department_name = line.get("departmentName")
-                if department or department_name:
-                    self.get_departments()
-                    item["DEPARTMENTID"] = IntacctSink.departments.get(
-                        department
-                    ) or IntacctSink.departments.get(department_name)
+                    if line.get("supplierName") and not item.get("VENDORID"):
+                        self.get_vendors()
+                        item["VENDORID"] = IntacctSink.vendors[line["supplierName"]]
 
-                location_name = line.get("location")
-                if location_name and not item["LOCATIONID"]:
-                    self.get_locations()
-                    try:
-                        item["LOCATIONID"] = IntacctSink.locations.get(location_name)
-                    except:
+                    class_name = line.get("className")
+                    if class_name and not item.get("CLASSID"):
+                        self.get_classes()
+                        try:
+                            item["CLASSID"] = IntacctSink.classes[class_name]
+                        except:
+                            self.logger.info(
+                                f"Skipping class due Class {class_name} does not exist. Did you mean any of these: {list(IntacctSink.classes.keys())}?"
+                            )
+
+                    self.get_accounts()
+                    account_name = line.get("accountName")
+                    if (
+                        account_name
+                        and item.get("ACCOUNTNO") not in IntacctSink.accounts.keys()
+                    ):
+                        item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
+                    if not item.get("ACCOUNTNO"):
                         return {
-                            "error": f"Location '{location_name}' does not exist. Did you mean any of these: {list(self.locations.keys())}?"
+                            "error": f"ERROR: ACCOUNTNAME or ACCOUNTNO not found for this tenant in item {item}. \n Intaccts Requires an ACCOUNTNO associated with each line item"
                         }
-                if not item["LOCATIONID"] and payload["LOCATIONID"]:
-                    item["LOCATIONID"] = payload["LOCATIONID"]
 
-                project_name = line.get("projectName")
-                if project_name and not item["PROJECTID"]:
-                    self.get_projects()
-                    item["PROJECTID"] = IntacctSink.projects.get(project_name)
+                    # departmentid is optional
+                    department = line.get("department")
+                    department_name = line.get("departmentName")
+                    if department or department_name:
+                        self.get_departments()
+                        item["DEPARTMENTID"] = IntacctSink.departments.get(
+                            department
+                        ) or IntacctSink.departments.get(department_name)
 
-                item_name = line.get("productName")
-                if item_name:
-                    self.get_items()
-                    item["ITEMID"] = IntacctSink.items.get(item_name)
+                    location_name = line.get("location")
+                    if location_name and not item["LOCATIONID"]:
+                        self.get_locations()
+                        try:
+                            item["LOCATIONID"] = IntacctSink.locations.get(location_name)
+                        except:
+                            return {
+                                "error": f"Location '{location_name}' does not exist. Did you mean any of these: {list(self.locations.keys())}?"
+                            }
+                    if not item["LOCATIONID"] and payload["LOCATIONID"]:
+                        item["LOCATIONID"] = payload["LOCATIONID"]
 
-                # add custom fields to the item payload
-                custom_fields = parse_objs(line.get("customFields", "[]"))
-                if custom_fields:
-                    [
-                        item.update({cf.get("name"): cf.get("value")})
-                        for cf in custom_fields
-                    ]
-                
-                payload["APBILLITEMS"]["APBILLITEM"].append(item)
+                    project_name = line.get("projectName")
+                    if project_name and not item["PROJECTID"]:
+                        self.get_projects()
+                        item["PROJECTID"] = IntacctSink.projects.get(project_name)
+
+                    item_name = line.get("productName")
+                    if item_name:
+                        self.get_items()
+                        item["ITEMID"] = IntacctSink.items.get(item_name)
+
+                    # add custom fields to the item payload
+                    custom_fields = parse_objs(line.get("customFields", "[]"))
+                    if custom_fields:
+                        [
+                            item.update({cf.get("name"): cf.get("value")})
+                            for cf in custom_fields
+                        ]
+                    
+                    bill_items.append(item)
+
+                payload["APBILLITEMS"] = { "APBILLITEM": bill_items }
 
             # send payload and attachments
             payload = clean_convert(payload)
