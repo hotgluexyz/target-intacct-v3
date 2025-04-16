@@ -244,7 +244,7 @@ class IntacctSink(HotglueSink):
             self.logger.error(f"Failed to parse response from {url}: {e.__repr__()}")
             raise FatalAPIError(f"Malformed response: {e.__repr__()}")
 
-    def get_records(self, intacct_object, fields, filter=None):
+    def get_records(self, intacct_object, fields, filter=None, docparid=None):
         if filter is None:
             filter = {}
  
@@ -264,6 +264,9 @@ class IntacctSink(HotglueSink):
             }
             if filter:
                 data["query"].update(filter)
+
+            if docparid:
+                data["query"]["docparid"] = docparid
 
             try:
                 response = self.request_api("POST", request_data=data)
