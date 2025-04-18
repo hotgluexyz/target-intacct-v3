@@ -36,3 +36,17 @@ def clean_convert(input):
         return input.isoformat()
     elif input:
         return input
+    
+def convert_date(date):
+    if date:
+        if isinstance(date, dt.datetime):
+            date = date.isoformat()
+        date = date.split("T")[0]
+        date = {
+            "year": date.split("-")[0],
+            "month": date.split("-")[1],
+            "day": date.split("-")[2],
+        }
+    else:
+        date = ""
+    return date
