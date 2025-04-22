@@ -9,6 +9,7 @@ from target_intacct_v3.sinks import (
     PurchaseInvoices,
     Suppliers,
     BillPayment,
+    PurchaseOrders,
 )
 
 
@@ -44,7 +45,7 @@ class TargetIntacctV3(TargetHotglue):
             th.BooleanType,
         ),
     ).to_dict()
-    SINK_TYPES = [Suppliers, APAdjustments, JournalEntries, Bills, PurchaseInvoices, BillPayment]
+    SINK_TYPES = [Suppliers, APAdjustments, JournalEntries, Bills, PurchaseInvoices, BillPayment, PurchaseOrders]
 
 
 if __name__ == "__main__":

@@ -797,3 +797,209 @@ class BillPayment(IntacctSink):
             response = self.request_api("POST", request_data={"create": record})
             id = response["data"]["appymt"]["RECORDNO"]
             return id, True, state_updates
+
+class PurchaseOrders(IntacctSink):
+    """IntacctV3 target sink class."""
+
+    name = "PurchaseOrders"
+
+    def preprocess_record(self, record: dict, context: dict) -> dict:
+        try:
+            # Map purchase order
+            payload = {
+                "transactiontype": "Purchase Order",
+                "RECORDNO": record.get("id"),
+                "datecreated": record.get("transactionDate"),
+                "vendorid": record.get("vendorId"),
+                "documentno": record.get("number"),
+                "referenceno": record.get("referenceNumber"),
+                "termname": record.get("paymentTerm"),
+                "datedue": record.get("dueDate"),
+                "message": record.get("description"),
+                "returnto": {"contactname": None},
+                "payto": {"contactname": None},
+                "basecurr": record.get("currency"),
+                "currency": record.get("currency"),
+                "exchratetype": "Intacct Daily Rate"
+            }
+
+            existing_order = None
+            if payload.get("RECORDNO"):
+                recordno = payload.get("RECORDNO")
+
+                # validate RECORDNO
+                invalid_chars = r"[\"\'&<>#?]"  # characters not allowed for RECORDNO [&, <, >, #, ?]
+                is_id_valid = not bool(re.search(invalid_chars, recordno))
+
+                if not is_id_valid:
+                    raise Exception(
+                        f"RECORDNO '{payload.get('RECORDNO')}' contains one or more invalid characters '&,<,>,#,?'. Please provide a RECORDNO that does not include these characters."
+                    )
+
+                # check if bill exists
+                existing_order = self.get_records(
+                    "PODOCUMENT",
+                    fields=["RECORDNO", "DOCNO"],
+                    filter={
+                        "filter": {
+                            "equalto": {
+                                "field": "RECORDNO",
+                                "value": recordno,
+                            }
+                        }
+                    },
+                    docparid="Purchase Order"
+                )
+            
+            existing_order_lines = None
+            if existing_order:
+                payload["@key"] = f"Purchase Order-{existing_order[0]['DOCNO']}"
+
+                existing_order_lines = self.get_records(
+                    "PODOCUMENTENTRY",
+                    fields=["RECORDNO"],
+                    filter={
+                        "filter": {
+                            "equalto": {
+                                "field": "DOCHDRNO",
+                                "value": recordno,
+                            }
+                        }
+                    },
+                    docparid="Purchase Order"
+                )
+
+            # look for vendorName and vendorId
+            vendor_name = record.get("vendorName")
+            if vendor_name and not payload.get("vendorid"):
+                self.get_vendors()
+                try:
+                    payload["vendorid"] = IntacctSink.vendors[vendor_name]
+                except:
+                    return {
+                        "error": f"ERROR: Vendor {vendor_name} does not exist. Did you mean any of these: {list(IntacctSink.vendors.keys())}?"
+                    }
+
+            if payload.get("datecreated"):
+                payload["datecreated"] = convert_date(payload.get("datecreated"))
+
+            if payload.get("datedue"):
+                payload["datedue"] = convert_date(payload.get("datedue"))
+
+            # process items
+            po_items = []
+            for item in record.get("lineItems", []):
+                item_payload = {
+                    "itemid": item.get("productId"),
+                    "quantity": item.get("quantity"),
+                    "unit": "Each",
+                    "price": item.get("unitPrice"),
+                    "tax": item.get("taxAmount"),
+                    "locationid": item.get("locationId"),
+                    "departmentid": item.get("departmentId"),
+                    "memo": item.get("description"),
+                    "projectid": item.get("projectId"),
+                    "employeeid": item.get("employeeId"),
+                    "classid": item.get("classId")
+                }
+
+                project_name = item.pop("projectName", None)
+                if project_name and not item_payload.get("projectid"):
+                    self.get_projects()
+                    try:
+                        item_payload["projectid"] = IntacctSink.projects[project_name]
+                    except:
+                        raise Exception(
+                            f"ERROR: projectname {project_name} not found for this account."
+                        )
+
+                location_name = item.pop("locationName", None)
+                if location_name and not item_payload.get("locationid"):
+                    self.get_locations()
+                    try:
+                        item_payload["locationid"] = IntacctSink.locations[location_name]
+                    except:
+                        raise Exception(
+                            f"ERROR: locationname {location_name} not found for this account."
+                        )
+
+                class_name = item.pop("className", None)
+                if class_name and not item_payload.get("classid"):
+                    self.get_classes()
+                    try:
+                        item_payload["classid"] = IntacctSink.classes[class_name]
+                    except:
+                        raise Exception(
+                            f"ERROR: classname {class_name} not found for this account."
+                        )
+
+                department_name = item.pop("departmentName", None)
+                if department_name and not item_payload.get("departmentid"):
+                    self.get_departments()
+                    try:
+                        item_payload["departmentid"] = IntacctSink.departments[department_name]
+                    except:
+                        raise Exception(
+                            f"ERROR: departmentname {department_name} not found for this account."
+                        )
+
+                po_items.append(item_payload)
+
+            # if it's an update
+            if payload.get("@key"):
+                fields_remove = ["vendorid", "transactiontype", "documentno"]
+                for field in fields_remove:
+                    payload.pop(field, None)
+
+                payload["updatepotransitems"] = {"potransitem": po_items}
+                if existing_order_lines:
+                    # delete existing lines
+                    payload["updatepotransitems"]["updatepotransitem"] = [{"@line_num": n, "itemid": None} for n in range(1, len(existing_order_lines)+1)] 
+            else:
+                payload["potransitems"] = {"potransitem": po_items}
+
+            return payload
+        except Exception as e:
+            return {"error": e.__repr__()}
+
+    def upsert_record(self, record: dict, context: dict) -> None:
+        """Process the record."""
+        state_updates = {}
+
+        if not record:
+            raise Exception("Received an empty record, skipping.")
+
+        if "error" in record:
+            raise Exception(f"Record error: {record['error']}")
+
+        record_id = record.pop("RECORDNO", record.get("documentno"))
+
+        # post/update record
+        try:
+            action = "update_potransaction" if record.get("@key") else "create_potransaction"
+            response = self.request_api("POST", request_data={action: record})
+            po_key = response["key"]
+
+            order = self.get_records(
+                "PODOCUMENT",
+                fields=["RECORDNO"],
+                filter={
+                    "filter": {
+                        "equalto": {
+                            "field": "DOCNO",
+                            "value": po_key.split("-")[1],
+                        }
+                    }
+                },
+                docparid="Purchase Order"
+            )
+            po_id = order[0]["RECORDNO"]
+            if action == "update_potransaction":
+                state_updates["is_updated"] = True
+
+            # Step 3: Log success and return the PO ID, success status, and state updates
+            self.logger.info(f"Successfully {action}d Purchase Order with id {po_id}")
+            return po_id, True, state_updates
+        except Exception as e:
+            self.logger.error(f"Failed to {action} Purchase Order with ID {record_id}: {e}")
+            raise Exception(f"Failed to {action} Purchase Order: {e}")
