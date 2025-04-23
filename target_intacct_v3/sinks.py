@@ -85,7 +85,7 @@ class Suppliers(IntacctSink):
 class APAdjustments(IntacctSink):
     """IntacctV3 target sink class."""
 
-    name = "APAdjustment"
+    name = "APAdjustments"
 
     def preprocess_record(self, record: dict, context: dict) -> dict:
         try:
@@ -164,7 +164,7 @@ class APAdjustments(IntacctSink):
                 if locationname and not item.get("locationid"):
                     self.get_locations()
                     try:
-                        item["locationid"] = IntacctSink.locations[item["locationname"]]
+                        item["locationid"] = IntacctSink.locations[locationname]
                     except:
                         raise Exception(
                             f"ERROR: locationname {item['locationname']} not found for this account."
@@ -174,7 +174,7 @@ class APAdjustments(IntacctSink):
                 if classname and not item.get("classid"):
                     self.get_classes()
                     try:
-                        item["classid"] = IntacctSink.classes[item["classname"]]
+                        item["classid"] = IntacctSink.classes[classname]
                     except:
                         raise Exception(
                             f"ERROR: classname {item['classname']} not found for this account."
@@ -184,9 +184,7 @@ class APAdjustments(IntacctSink):
                 if departmentname and not item.get("departmentid"):
                     self.get_departments()
                     try:
-                        item["departmentid"] = IntacctSink.departments[
-                            item["departmentname"]
-                        ]
+                        item["departmentid"] = IntacctSink.departments[departmentname]
                     except:
                         raise Exception(
                             f"ERROR: departmentname {item['departmentname']} not found for this account."
