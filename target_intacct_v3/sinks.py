@@ -138,13 +138,13 @@ class APAdjustments(IntacctSink):
                 accountlabel = item.pop("accountlabel", None)
                 if accountlabel and not item.get("glaccountno"):
                     self.get_accounts()
-                    item["glaccountno"] = IntacctSink.accounts.get(item["accountlabel"])
+                    item["glaccountno"] = IntacctSink.accounts.get(accountlabel)
 
                 vendorname = item.pop("vendorname", None)
                 if vendorname and not item.get("vendorid"):
                     self.get_vendors()
                     try:
-                        item["vendorid"] = IntacctSink.vendors[item["vendorname"]]
+                        item["vendorid"] = IntacctSink.vendors[vendorname]
                     except:
                         raise Exception(
                             f"ERROR: vendorname {item['vendorname']} not found for this account."
@@ -154,7 +154,7 @@ class APAdjustments(IntacctSink):
                 if projectname and not item.get("projectid"):
                     self.get_projects()
                     try:
-                        item["projectid"] = IntacctSink.projects[item["projectname"]]
+                        item["projectid"] = IntacctSink.projects[projectname]
                     except:
                         raise Exception(
                             f"ERROR: projectname {item['projectname']} not found for this account."
