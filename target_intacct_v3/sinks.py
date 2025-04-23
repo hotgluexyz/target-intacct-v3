@@ -394,7 +394,7 @@ class Bills(IntacctSink):
                         "ENTRYDESCRIPTION": line.get("description"),
                         "LOCATIONID": line.get("locationId"),
                         "CLASSID": line.get("classId"),
-                        "ACCOUNTNO": line.get("accountNumber"), # TODO: should this be accountId?
+                        "ACCOUNTNO": line.get("accountNumber"),
                         "VENDORID": line.get("vendorId"), # TODO: this isn't in the model
                         "DEPARTMENTID": line.get("departmentId"),
                         "ITEMID": line.get("itemId"),
