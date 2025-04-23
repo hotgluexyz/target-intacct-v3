@@ -235,7 +235,7 @@ class IntacctSink(HotglueSink):
 
             # validate response
             result = parsed_response["response"]["operation"]["result"]
-            self.logger.info(f"Succesful request to {url} with response: {result}")
+            # self.logger.info(f"Succesful request to {url} with response: {result}")
             return result
         
         except requests.RequestException as e:
