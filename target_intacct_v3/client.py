@@ -217,8 +217,9 @@ class IntacctSink(HotglueSink):
         headers.update(self.default_headers)
         params.update(self.params)
 
-        if "attachmentdata" not in str(request_data):
-            self.logger.info(f"Making request to {url} with payload: {request_data}")
+        # NOTE below lines are for debugging purposes
+        # if "attachmentdata" not in str(request_data):
+        #     self.logger.info(f"Making request to {url} with payload: {request_data}")
 
         try:
             response = requests.request(
