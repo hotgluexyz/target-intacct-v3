@@ -89,6 +89,9 @@ class APAdjustments(IntacctSink):
 
     def preprocess_record(self, record: dict, context: dict) -> dict:
         try:
+            # Only want the date, not the time
+            record["transactionDate"] = record.get("transactionDate", "").split("T")[0]
+
             payload = {
                 "vendorid": record.get("vendorId"),
                 "datecreated": {
