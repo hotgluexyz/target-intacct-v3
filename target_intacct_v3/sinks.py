@@ -319,7 +319,7 @@ class Bills(IntacctSink):
                 else None,
                 "WHENDUE": record.get("dueDate"),
                 "BASECURR": record.get("currency"),
-                "RECPAYMENTDATE": record.get("paidDate"), # TODO: this is not in our model!
+                "RECPAYMENTDATE": record.get("paidDate"),
                 "WHENCREATED": record.get("createdAt", "").split("T")[0],
                 "WHENPOSTED": record.get("issueDate"),
                 "APBILLITEMS": {"APBILLITEM": []},
@@ -390,18 +390,18 @@ class Bills(IntacctSink):
                 for line in lines + expenses:
                     item = {
                         "PROJECTID": line.get("projectId"),
-                        "TRX_AMOUNT": line.get("totalPrice"),
+                        "TRX_AMOUNT": line.get("amount"),
                         "ACCOUNTNAME": line.get("accountName"),
                         "ENTRYDESCRIPTION": line.get("description"),
                         "LOCATIONID": line.get("locationId"),
                         "CLASSID": line.get("classId"),
                         "ACCOUNTNO": line.get("accountNumber"),
-                        "VENDORID": line.get("vendorId"), # TODO: this isn't in the model
+                        "VENDORID": line.get("vendorId"),
                         "DEPARTMENTID": line.get("departmentId"),
                         "ITEMID": line.get("itemId"),
+                        "TASKID": line.get("taskId"),
                     }
 
-                    # TODO: This isn't in the model
                     if line.get("vendorName") and not item.get("VENDORID"):
                         self.get_vendors()
                         item["VENDORID"] = IntacctSink.vendors[line["vendorName"]]
@@ -459,6 +459,24 @@ class Bills(IntacctSink):
                     if item_name and not item["ITEMID"]:
                         self.get_items()
                         item["ITEMID"] = IntacctSink.items.get(item_name)
+
+                    # lookup if the bill already exists if RECORDNO is not provided
+                    employee_no = line.get("employeeId")
+                    if employee_no:
+                        employee = self.get_records(
+                            "employees",
+                            fields=["RECORDNO", "EMPLOYEEID"],
+                            filter={
+                                "filter": {
+                                    "equalto": {
+                                        "field": "RECORDNO",
+                                        "value": employee_no,
+                                    }
+                                }
+                            },
+                        )
+                        if employee:
+                            item["EMPLOYEEID"] = employee[0].get("EMPLOYEEID")
 
                     payload["APBILLITEMS"]["APBILLITEM"].append(item)
 
