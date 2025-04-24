@@ -323,10 +323,10 @@ class Bills(IntacctSink):
                 "WHENCREATED": record.get("createdAt", "").split("T")[0],
                 "WHENPOSTED": record.get("issueDate"),
                 "APBILLITEMS": {"APBILLITEM": []},
-                "VENDORID": record.get("vendorId"),
+                "VENDORID": record.get("vendorNumber"),
                 "RECORDID": record.get("externalId"),
                 "RECORDNO": record.get("id"),
-                "LOCATIONID": record.get("locationId"),
+                "LOCATIONID": record.get("locationNumber"),
                 "DOCNUMBER": record.get("transactionNumber"),
                 "DESCRIPTION": record.get("description"),
             }
@@ -360,6 +360,16 @@ class Bills(IntacctSink):
                     bill_state = existing_bill[0].get("STATE")
 
             # include locationid at header level
+            location_id = record.get("locationId")
+            if location_id and not payload.get("LOCATIONID"):
+                self.get_locations()
+                try:
+                    payload["LOCATIONID"] = IntacctSink.locations_by_id[location_id]
+                except:
+                    return {
+                        "error": f"ERROR: Location id '{location_id}' does not exist."
+                    }
+
             locationname = record.get("locationName")
             if locationname and not payload.get("LOCATIONID"):
                 self.get_locations()
@@ -368,6 +378,16 @@ class Bills(IntacctSink):
                 except:
                     return {
                         "error": f"ERROR: Location '{locationname}' does not exist. Did you mean any of these: {list(IntacctSink.locations.keys())}?"
+                    }
+
+            vendorid = record.get("vendorId")
+            if vendorid and not payload.get("VENDORID"):
+                self.get_vendors()
+                try:
+                    payload["VENDORID"] = IntacctSink.vendors_by_id[vendorid]
+                except:
+                    return {
+                        "error": f"ERROR: Vendor id '{vendorid}' does not exist."
                     }
 
             # lookup for vendorName
@@ -393,18 +413,36 @@ class Bills(IntacctSink):
                         "TRX_AMOUNT": line.get("amount"),
                         "ACCOUNTNAME": line.get("accountName"),
                         "ENTRYDESCRIPTION": line.get("description"),
-                        "LOCATIONID": line.get("locationId"),
-                        "CLASSID": line.get("classId"),
+                        "LOCATIONID": line.get("locationNumber"),
+                        "CLASSID": line.get("classNumber"),
                         "ACCOUNTNO": line.get("accountNumber"),
-                        "VENDORID": line.get("vendorId"),
-                        "DEPARTMENTID": line.get("departmentId"),
+                        "VENDORID": line.get("vendorNumber"),
+                        "DEPARTMENTID": line.get("departmentNumber"),
                         "ITEMID": line.get("itemId"),
                         "TASKID": line.get("taskId"),
                     }
 
+                    if line.get("vendorId") and not item.get("VENDORID"):
+                        self.get_vendors()
+                        try:
+                            item["VENDORID"] = IntacctSink.vendors_by_id[line["vendorId"]]
+                        except:
+                            return {
+                                "error": f"ERROR: Vendor id '{line['vendorId']}' does not exist."
+                            }
+
                     if line.get("vendorName") and not item.get("VENDORID"):
                         self.get_vendors()
                         item["VENDORID"] = IntacctSink.vendors[line["vendorName"]]
+
+                    if line.get("classId") and not item.get("CLASSID"):
+                        self.get_classes()
+                        try:
+                            item["CLASSID"] = IntacctSink.classes_by_id[line["classId"]]
+                        except:
+                            return {
+                                "error": f"ERROR: Class id '{line['classId']}' does not exist."
+                            }
 
                     class_name = line.get("className")
                     if class_name and not item.get("CLASSID"):
@@ -417,16 +455,26 @@ class Bills(IntacctSink):
                             )
 
                     self.get_accounts()
+
+                    account_id = line.get("accountId")
+                    if account_id and item.get("ACCOUNTNO") not in IntacctSink.accounts.values():
+                        item["ACCOUNTNO"] = IntacctSink.accounts_by_id.get(account_id)
+
                     account_name = line.get("accountName")
                     if (
                         account_name
-                        and item.get("ACCOUNTNO") not in IntacctSink.accounts.keys()
+                        and item.get("ACCOUNTNO") not in IntacctSink.accounts.values()
                     ):
                         item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
                     if not item.get("ACCOUNTNO"):
                         return {
                             "error": f"ERROR: ACCOUNTNAME or ACCOUNTNO not found for this tenant in item {item}. \n Intaccts Requires an ACCOUNTNO associated with each line item"
                         }
+
+                    department_id = line.get("departmentId")
+                    if department_id and not item.get("DEPARTMENTID"):
+                        self.get_departments()
+                        item["DEPARTMENTID"] = IntacctSink.departments_by_id.get(department_id)
 
                     department_name = line.get("departmentName")
                     # if no departmentId set, lookup based on departmentName
@@ -435,6 +483,16 @@ class Bills(IntacctSink):
                         item["DEPARTMENTID"] = IntacctSink.departments.get(
                             department_name
                         )
+
+                    location_id = line.get("locationId")
+                    if location_id and not item.get("LOCATIONID"):
+                        self.get_locations()
+                        try:
+                            item["LOCATIONID"] = IntacctSink.locations_by_id.get(location_id)
+                        except:
+                            return {
+                                "error": f"ERROR: Location id '{location_id}' does not exist."
+                            }
 
                     location_name = line.get("locationName")
                     if location_name and not item["LOCATIONID"]:
@@ -450,10 +508,20 @@ class Bills(IntacctSink):
                     if not item["LOCATIONID"] and payload["LOCATIONID"]:
                         item["LOCATIONID"] = payload["LOCATIONID"]
 
+                    project_id = line.get("projectId")
+                    if project_id and not item["PROJECTID"]:
+                        self.get_projects()
+                        item["PROJECTID"] = IntacctSink.projects_by_id.get(project_id)
+
                     project_name = line.get("projectName")
                     if project_name and not item["PROJECTID"]:
                         self.get_projects()
                         item["PROJECTID"] = IntacctSink.projects.get(project_name)
+
+                    item_id = line.get("itemId")
+                    if item_id and not item["ITEMID"]:
+                        self.get_items()
+                        item["ITEMID"] = IntacctSink.items_by_id.get(item_id)
 
                     item_name = line.get("itemName")
                     if item_name and not item["ITEMID"]:
@@ -461,8 +529,8 @@ class Bills(IntacctSink):
                         item["ITEMID"] = IntacctSink.items.get(item_name)
 
                     # lookup if the bill already exists if RECORDNO is not provided
-                    employee_no = line.get("employeeId")
-                    if employee_no:
+                    employee_id = line.get("employeeId")
+                    if employee_id:
                         employee = self.get_records(
                             "employees",
                             fields=["RECORDNO", "EMPLOYEEID"],
@@ -470,7 +538,7 @@ class Bills(IntacctSink):
                                 "filter": {
                                     "equalto": {
                                         "field": "RECORDNO",
-                                        "value": employee_no,
+                                        "value": employee_id,
                                     }
                                 }
                             },
