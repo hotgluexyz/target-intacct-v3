@@ -415,7 +415,7 @@ class Bills(IntacctSink):
                         "ENTRYDESCRIPTION": line.get("description"),
                         "LOCATIONID": line.get("locationExternalId"),
                         "CLASSID": line.get("classExternalId"),
-                        "ACCOUNTNO": line.get("accountExternalId"),
+                        "ACCOUNTNO": line.get("accountNumber"),
                         "VENDORID": line.get("vendorExternalId"),
                         "DEPARTMENTID": line.get("departmentExternalId"),
                         "ITEMID": line.get("itemId"),
