@@ -419,7 +419,7 @@ class Bills(IntacctSink):
                         "VENDORID": line.get("vendorNumber"),
                         "DEPARTMENTID": line.get("departmentNumber"),
                         "ITEMID": line.get("itemId"),
-                        "TASKID": line.get("taskId"),
+                        "TASKID": line.get("taskNumber"),
                     }
 
                     if line.get("vendorId") and not item.get("VENDORID"):
