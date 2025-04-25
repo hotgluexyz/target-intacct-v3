@@ -323,10 +323,10 @@ class Bills(IntacctSink):
                 "WHENCREATED": record.get("createdAt", "").split("T")[0],
                 "WHENPOSTED": record.get("issueDate"),
                 "APBILLITEMS": {"APBILLITEM": []},
-                "VENDORID": record.get("vendorNumber"),
+                "VENDORID": record.get("vendorExternalId"),
                 "RECORDID": record.get("externalId"),
                 "RECORDNO": record.get("id"),
-                "LOCATIONID": record.get("locationNumber"),
+                "LOCATIONID": record.get("locationExternalId"),
                 "DOCNUMBER": record.get("transactionNumber"),
                 "DESCRIPTION": record.get("description"),
             }
@@ -413,13 +413,13 @@ class Bills(IntacctSink):
                         "TRX_AMOUNT": line.get("amount"),
                         "ACCOUNTNAME": line.get("accountName"),
                         "ENTRYDESCRIPTION": line.get("description"),
-                        "LOCATIONID": line.get("locationNumber"),
-                        "CLASSID": line.get("classNumber"),
-                        "ACCOUNTNO": line.get("accountNumber"),
-                        "VENDORID": line.get("vendorNumber"),
-                        "DEPARTMENTID": line.get("departmentNumber"),
+                        "LOCATIONID": line.get("locationExternalId"),
+                        "CLASSID": line.get("classExternalId"),
+                        "ACCOUNTNO": line.get("accountExternalId"),
+                        "VENDORID": line.get("vendorExternalId"),
+                        "DEPARTMENTID": line.get("departmentExternalId"),
                         "ITEMID": line.get("itemId"),
-                        "TASKID": line.get("taskNumber"),
+                        "TASKID": line.get("taskExternalId"),
                     }
 
                     if line.get("vendorId") and not item.get("VENDORID"):
