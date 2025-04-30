@@ -217,8 +217,9 @@ class IntacctSink(HotglueSink):
         headers.update(self.default_headers)
         params.update(self.params)
 
-        if "attachmentdata" not in str(request_data):
-            self.logger.info(f"Making request to {url} with payload: {request_data}")
+        # NOTE below lines are for debugging purposes
+        # if "attachmentdata" not in str(request_data):
+        #     self.logger.info(f"Making request to {url} with payload: {request_data}")
 
         try:
             response = requests.request(
@@ -234,7 +235,7 @@ class IntacctSink(HotglueSink):
 
             # validate response
             result = parsed_response["response"]["operation"]["result"]
-            self.logger.info(f"Succesful request to {url} with response: {result}")
+            # self.logger.info(f"Succesful request to {url} with response: {result}")
             return result
         
         except requests.RequestException as e:
@@ -290,50 +291,58 @@ class IntacctSink(HotglueSink):
 
     def get_vendors(self):
         if IntacctSink.vendors is None:
-            vendors = self.get_records("VENDOR", ["VENDORID", "NAME"])
+            vendors = self.get_records("VENDOR", ["VENDORID", "NAME", "RECORDNO"])
             IntacctSink.vendors = dictify(vendors, "NAME", "VENDORID")
+            IntacctSink.vendors_by_id = dictify(vendors, "RECORDNO", "VENDORID")
         return IntacctSink.vendors
 
     def get_accounts(self):
         if IntacctSink.accounts is None:
             accounts = self.get_records("GLACCOUNT", ["RECORDNO", "ACCOUNTNO", "TITLE"])
             IntacctSink.accounts = dictify(accounts, "TITLE", "ACCOUNTNO")
+            IntacctSink.accounts_by_id = dictify(accounts, "RECORDNO", "ACCOUNTNO")
         return IntacctSink.accounts
 
     def get_projects(self):
         if IntacctSink.projects is None:
-            projects = self.get_records("PROJECT", ["PROJECTID", "NAME"])
+            projects = self.get_records("PROJECT", ["PROJECTID", "NAME", "RECORDNO"])
             IntacctSink.projects = dictify(projects, "NAME", "PROJECTID")
+            IntacctSink.projects_by_id = dictify(projects, "RECORDNO", "PROJECTID")
         return IntacctSink.projects
 
     def get_locations(self):
         if IntacctSink.locations is None:
-            locations = self.get_records("LOCATION", ["LOCATIONID", "NAME"])
+            locations = self.get_records("LOCATION", ["LOCATIONID", "NAME", "RECORDNO"])
             IntacctSink.locations = dictify(locations, "NAME", "LOCATIONID")
+            IntacctSink.locations_by_id = dictify(locations, "RECORDNO", "LOCATIONID")
         return IntacctSink.locations
 
     def get_classes(self):
         if IntacctSink.classes is None:
-            classes = self.get_records("CLASS", ["CLASSID", "NAME"])
+            classes = self.get_records("CLASS", ["CLASSID", "NAME", "RECORDNO"])
             IntacctSink.classes = dictify(classes, "NAME", "CLASSID")
+            IntacctSink.classes_by_id = dictify(classes, "RECORDNO", "CLASSID")
         return IntacctSink.classes
 
     def get_departments(self):
         if IntacctSink.departments is None:
-            departments = self.get_records("DEPARTMENT", ["DEPARTMENTID", "TITLE"])
+            departments = self.get_records("DEPARTMENT", ["DEPARTMENTID", "TITLE", "RECORDNO"])
             IntacctSink.departments = dictify(departments, "TITLE", "DEPARTMENTID")
+            IntacctSink.departments_by_id = dictify(departments, "RECORDNO", "DEPARTMENTID")
         return IntacctSink.departments
 
     def get_customers(self):
         if IntacctSink.customers is None:
-            customers = self.get_records("CUSTOMER", ["CUSTOMERID", "NAME"])
+            customers = self.get_records("CUSTOMER", ["CUSTOMERID", "NAME", "RECORDNO"])
             IntacctSink.customers = dictify(customers, "NAME", "CUSTOMERID")
+            IntacctSink.customers_by_id = dictify(customers, "RECORDNO", "CUSTOMERID")
         return IntacctSink.customers
 
     def get_items(self):
         if IntacctSink.items is None:
-            items = self.get_records("ITEM", ["ITEMID", "NAME"])
+            items = self.get_records("ITEM", ["ITEMID", "NAME", "RECORDNO"])
             IntacctSink.items = dictify(items, "NAME", "ITEMID")
+            IntacctSink.items_by_id = dictify(items, "RECORDNO", "ITEMID")
         return IntacctSink.items
 
     def prepare_attachment_payload(
