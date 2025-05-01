@@ -93,7 +93,7 @@ class APAdjustments(IntacctSink):
             record["transactionDate"] = record.get("transactionDate", "").split("T")[0]
 
             payload = {
-                "vendorid": record.get("vendorId"),
+                "vendorid": record.get("vendorExternalId"),
                 "datecreated": {
                     "year": record.get("transactionDate", "").split("-")[0],
                     "month": record.get("transactionDate", "").split("-")[1],
@@ -110,11 +110,21 @@ class APAdjustments(IntacctSink):
                 "apadjustmentitems": {"lineitem": []},
             }
 
-            self.get_vendors()
+            vendorid = record.get("vendorId")
+            if vendorid and payload.get("vendorid") not in IntacctSink.vendors.values():
+                self.get_vendors()
+                try:
+                    payload["vendorid"] = IntacctSink.vendors_by_id[vendorid]
+                except:
+                    return {
+                        "error": f"ERROR: Vendor id '{vendorid}' does not exist."
+                    }
+
             if (
                 payload.get("vendorname")
                 and payload.get("vendorid") not in IntacctSink.vendors.values()
             ):
+                self.get_vendors()
                 payload["vendorid"] = IntacctSink.vendors.get(payload["vendorname"])
 
             lines = parse_objs(record.get("lineItems", []))
@@ -127,21 +137,30 @@ class APAdjustments(IntacctSink):
                     "amount": line.get("amount"),
                     "memo": line.get("memo"),
                     "locationname": line.get("locationName"),
-                    "locationid": line.get("locationId"),
+                    "locationid": line.get("locationExternalId"),
                     "departmentname": line.get("departmentName"),
-                    "departmentid": line.get("departmentId"),
+                    "departmentid": line.get("departmentExternalId"),
                     "projectname": line.get("projectName"),
-                    "projectid": line.get("projectId"),
+                    "projectid": line.get("projectExternalId"),
                     "vendorname": line.get("vendorName"),
-                    "vendorid": line.get("vendorId"),
+                    "vendorid": line.get("vendorExternalId"),
                     "classname": line.get("className"),
-                    "classid": line.get("classId"),
+                    "classid": line.get("classExternalId"),
                 }
 
                 accountlabel = item.pop("accountlabel", None)
                 if accountlabel and not item.get("glaccountno"):
                     self.get_accounts()
                     item["glaccountno"] = IntacctSink.accounts.get(accountlabel)
+
+                if line.get("vendorId") and not item.get("vendorid"):
+                    self.get_vendors()
+                    try:
+                        item["vendorid"] = IntacctSink.vendors_by_id[line["vendorId"]]
+                    except:
+                        return {
+                            "error": f"ERROR: Vendor id '{line['vendorId']}' does not exist."
+                        }
 
                 vendorname = item.pop("vendorname", None)
                 if vendorname and not item.get("vendorid"):
@@ -153,6 +172,11 @@ class APAdjustments(IntacctSink):
                             f"ERROR: vendorname {item['vendorname']} not found for this account."
                         )
 
+                project_id = line.get("projectId")
+                if project_id and not item["projectid"]:
+                    self.get_projects()
+                    item["projectid"] = IntacctSink.projects_by_id.get(project_id)
+
                 projectname = item.pop("projectname", None)
                 if projectname and not item.get("projectid"):
                     self.get_projects()
@@ -162,6 +186,16 @@ class APAdjustments(IntacctSink):
                         raise Exception(
                             f"ERROR: projectname {item['projectname']} not found for this account."
                         )
+
+                location_id = line.get("locationId")
+                if location_id and not item.get("locationid"):
+                    self.get_locations()
+                    try:
+                        item["locationid"] = IntacctSink.locations_by_id.get(location_id)
+                    except:
+                        return {
+                            "error": f"ERROR: Location id '{location_id}' does not exist."
+                        }
 
                 locationname = item.pop("locationname", None)
                 if locationname and not item.get("locationid"):
@@ -173,6 +207,15 @@ class APAdjustments(IntacctSink):
                             f"ERROR: locationname {item['locationname']} not found for this account."
                         )
 
+                if line.get("classId") and not item.get("classid"):
+                    self.get_classes()
+                    try:
+                        item["classid"] = IntacctSink.classes_by_id[line["classId"]]
+                    except:
+                        return {
+                            "error": f"ERROR: Class id '{line['classId']}' does not exist."
+                        }
+
                 classname = item.pop("classname", None)
                 if classname and not item.get("classid"):
                     self.get_classes()
@@ -182,6 +225,11 @@ class APAdjustments(IntacctSink):
                         raise Exception(
                             f"ERROR: classname {item['classname']} not found for this account."
                         )
+
+                department_id = line.get("departmentId")
+                if department_id and not item.get("departmentid"):
+                    self.get_departments()
+                    item["departmentid"] = IntacctSink.departments_by_id.get(department_id)
 
                 departmentname = item.pop("departmentname", None)
                 if departmentname and not item.get("departmentid"):
@@ -688,7 +736,7 @@ class PurchaseOrders(IntacctSink):
                 "transactiontype": "Purchase Order",
                 "RECORDNO": record.get("id"),
                 "datecreated": record.get("transactionDate"),
-                "vendorid": record.get("vendorId"),
+                "vendorid": record.get("vendorExternalId"),
                 "documentno": record.get("number"),
                 "referenceno": record.get("referenceNumber"),
                 "termname": record.get("paymentTerm"),
@@ -748,6 +796,16 @@ class PurchaseOrders(IntacctSink):
                 )
 
             # look for vendorName and vendorId
+            vendorid = record.get("vendorId")
+            if vendorid and not payload.get("vendorid"):
+                self.get_vendors()
+                try:
+                    payload["vendorid"] = IntacctSink.vendors_by_id[vendorid]
+                except:
+                    return {
+                        "error": f"ERROR: Vendor id '{vendorid}' does not exist."
+                    }
+
             vendor_name = record.get("vendorName")
             if vendor_name and not payload.get("vendorid"):
                 self.get_vendors()
@@ -768,18 +826,28 @@ class PurchaseOrders(IntacctSink):
             po_items = []
             for item in record.get("lineItems", []):
                 item_payload = {
-                    "itemid": item.get("productId"),
+                    "itemid": item.get("itemExternalId"),
                     "quantity": item.get("quantity"),
                     "unit": "Each",
                     "price": item.get("unitPrice"),
                     "tax": item.get("taxAmount"),
-                    "locationid": item.get("locationId"),
-                    "departmentid": item.get("departmentId"),
+                    "locationid": item.get("locationExternalId"),
+                    "departmentid": item.get("departmentExternalId"),
                     "memo": item.get("description"),
-                    "projectid": item.get("projectId"),
-                    "employeeid": item.get("employeeId"),
-                    "classid": item.get("classId")
+                    "projectid": item.get("projectExternalId"),
+                    "employeeid": item.get("employeeExternalId"),
+                    "classid": item.get("classExternalId")
                 }
+
+                item_id = item.get("itemId")
+                if item_id and not item_payload["itemid"]:
+                    self.get_items()
+                    item_payload["itemid"] = IntacctSink.items_by_id.get(item_id)
+
+                project_id = item.get("projectId")
+                if project_id and not item_payload["projectid"]:
+                    self.get_projects()
+                    item_payload["projectid"] = IntacctSink.projects_by_id.get(project_id)
 
                 project_name = item.pop("projectName", None)
                 if project_name and not item_payload.get("projectid"):
@@ -791,6 +859,16 @@ class PurchaseOrders(IntacctSink):
                             f"ERROR: projectname {project_name} not found for this account."
                         )
 
+                location_id = item.get("locationId")
+                if location_id and not item_payload.get("locationid"):
+                    self.get_locations()
+                    try:
+                        item_payload["locationid"] = IntacctSink.locations_by_id.get(location_id)
+                    except:
+                        return {
+                            "error": f"ERROR: Location id '{location_id}' does not exist."
+                        }
+
                 location_name = item.pop("locationName", None)
                 if location_name and not item_payload.get("locationid"):
                     self.get_locations()
@@ -801,6 +879,15 @@ class PurchaseOrders(IntacctSink):
                             f"ERROR: locationname {location_name} not found for this account."
                         )
 
+                if item.get("classId") and not item_payload.get("classid"):
+                    self.get_classes()
+                    try:
+                        item_payload["classid"] = IntacctSink.classes_by_id[item["classId"]]
+                    except:
+                        return {
+                            "error": f"ERROR: Class id '{item['classId']}' does not exist."
+                        }
+
                 class_name = item.pop("className", None)
                 if class_name and not item_payload.get("classid"):
                     self.get_classes()
@@ -810,6 +897,11 @@ class PurchaseOrders(IntacctSink):
                         raise Exception(
                             f"ERROR: classname {class_name} not found for this account."
                         )
+
+                department_id = item.get("departmentId")
+                if department_id and not item_payload.get("departmentid"):
+                    self.get_departments()
+                    item_payload["departmentid"] = IntacctSink.departments_by_id.get(department_id)
 
                 department_name = item.pop("departmentName", None)
                 if department_name and not item_payload.get("departmentid"):
