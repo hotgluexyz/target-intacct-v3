@@ -393,7 +393,7 @@ class Bills(IntacctSink):
                     "TRX_AMOUNT": line.get("totalPrice", line.get("amount")),
                     "ACCOUNTNAME": line.get("accountName"),
                     "ENTRYDESCRIPTION": line.get("description"),
-                    "LOCATIONID": payload.get("LOCATIONID"),  # same as header level
+                    "LOCATIONID": line.get("locationId") or payload.get("LOCATIONID"),  # same as header level by default
                     "CLASSID": line.get("classId"),
                     "ACCOUNTNO": line.get("accountNumber"),
                     "VENDORID": line.get("vendorId"),
@@ -590,7 +590,7 @@ class PurchaseInvoices(IntacctSink):
                         "TRX_AMOUNT": line.get("totalPrice", line.get("amount")),
                         "ACCOUNTNAME": line.get("accountName"),
                         "ENTRYDESCRIPTION": line.get("description"),
-                        "LOCATIONID": payload.get("LOCATIONID"),  # same as header level
+                        "LOCATIONID": line.get("locationId") or payload.get("LOCATIONID"),  # same as header level by default
                         "CLASSID": line.get("classId"),
                         "ACCOUNTNO": line.get("accountNumber"),
                         "VENDORID": line.get("supplierNumber", line.get("supplierCode")),
