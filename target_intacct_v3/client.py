@@ -337,13 +337,11 @@ class IntacctSink(HotglueSink):
         return IntacctSink.items
 
     def prepare_attachment_payload(
-        self, attachments, record_id, existing_attachments=None
+        self, attachments, supdoc_id, existing_attachments=None, folder_id=None
     ):
         if existing_attachments is None:
             existing_attachments = {"names": [], "content": []}
-        
-        supdoc_id = str(record_id).replace("-","")[-20:] # supdocid only allows 20 chars
-        self.logger.info(f"Transforming record_id: {record_id} into supdoc_id: {supdoc_id}")
+
         if isinstance(attachments, str):
             attachments = parse_objs(attachments)
 
@@ -397,8 +395,8 @@ class IntacctSink(HotglueSink):
             return {
                 f"{action}_supdoc": {
                     "supdocid": supdoc_id,  # only 20 chars allowed
-                    "supdocname": record_id,
-                    "supdocfoldername": record_id,  # we use the actual record id as foldername
+                    "supdocname": supdoc_id,
+                    "supdocfoldername": folder_id,  # we use the actual record id as foldername
                     "attachments": {"attachment": filtered_attachments},
                 }
             }
@@ -431,7 +429,7 @@ class IntacctSink(HotglueSink):
 
         # prepare attachments payload
         try:
-            att_payload = self.prepare_attachment_payload(attachments, supdoc_id, existing_attachments)
+            att_payload = self.prepare_attachment_payload(attachments, supdoc_id, existing_attachments, folder_id=record_id)
         except Exception as e:
             self.logger.error(f"Failed to prepare attachment payload for record {record_id}: {e.__repr__()}")
             return
@@ -439,17 +437,17 @@ class IntacctSink(HotglueSink):
         if att_payload:
             try:
                 # Check if the folder exists
-                check_folder = {"get": {"@object": "supdocfolder", "@key": supdoc_id}}
+                check_folder = {"get": {"@object": "supdocfolder", "@key": record_id}}
                 folder_response = self.request_api("POST", request_data=check_folder)
                 folder_exists = folder_response.get("data", {}).get("supdocfolder")
 
                 if folder_exists:
-                    self.logger.info(f"Folder with name {supdoc_id} already exists.")
+                    self.logger.info(f"Folder with name {record_id} already exists.")
                 else:
                     # Create folder if it doesn't exist
-                    folder_payload = {"create_supdocfolder": {"supdocfoldername": supdoc_id}}
+                    folder_payload = {"create_supdocfolder": {"supdocfoldername": record_id}}
                     self.request_api("POST", request_data=folder_payload)
-                    self.logger.info(f"Created folder with name {supdoc_id}.")
+                    self.logger.info(f"Created folder with name {record_id}.")
 
                 # Post the attachments
                 self.request_api("POST", request_data=att_payload)
