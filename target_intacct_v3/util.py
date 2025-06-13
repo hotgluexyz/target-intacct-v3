@@ -28,13 +28,13 @@ def clean_convert(input):
         for k, v in input.items():
             v = clean_convert(v)
             if isinstance(v, list):
-                output[k] = [i for i in v if (i)]
-            elif v:
+                output[k] = [i for i in v if i is not None]
+            elif v is not None:
                 output[k] = v
         return output
     elif isinstance(input, dt.datetime):
         return input.isoformat()
-    elif input:
+    elif input is not None:
         return input
     
 def convert_date(date):
