@@ -342,7 +342,7 @@ class IntacctSink(HotglueSink):
         if existing_attachments is None:
             existing_attachments = {"names": [], "content": []}
         
-        supdoc_id = str(record_id).replace("-","")[-20:].strip("-")  # supdocid only allows 20 chars
+        supdoc_id = str(record_id).replace("-","")[-20:] # supdocid only allows 20 chars
         self.logger.info(f"Transforming record_id: {record_id} into supdoc_id: {supdoc_id}")
         if isinstance(attachments, str):
             attachments = parse_objs(attachments)
@@ -404,21 +404,23 @@ class IntacctSink(HotglueSink):
             }
 
     def post_attachments(self, attachments, record_id):
+
+        supdoc_id = str(record_id).replace("-","")[-20:]  # supdocid only allows 20 chars
+        self.logger.info(f"Transforming record_id: {record_id} into supdoc_id: {supdoc_id}")
         # 1. check if supdoc exists and get existing attachments
         try:
-            supdoc_id = str(record_id).replace("-","")[-20:].strip("-")  # supdocid only allows 20 chars
             check_supdoc = {"get": {"@object": "supdoc", "@key": supdoc_id}}
             supdoc_response = self.request_api("POST", request_data=check_supdoc)
             supdoc = (supdoc_response.get("data") or {}).get("supdoc")
         except Exception as e:
-            self.logger.error(f"Failed to check existing supdoc for record {record_id}: {e.__repr__()}")
+            self.logger.error(f"Failed to check existing supdoc for record {supdoc_id}: {e.__repr__()}")
             return
         
 
         # getting existing attachments
         existing_attachments = {"names": [], "content": []}
         if supdoc:
-            self.logger.info(f"Supdoc with ID {record_id} already exists, updating it.")
+            self.logger.info(f"Supdoc with ID {supdoc_id} already exists, updating it.")
             existing_attachments_data = supdoc.get("attachments", {}).get("attachment")
             if isinstance(existing_attachments_data, dict):
                 existing_attachments["names"] = [existing_attachments_data.get("attachmentname")]
@@ -429,7 +431,7 @@ class IntacctSink(HotglueSink):
 
         # prepare attachments payload
         try:
-            att_payload = self.prepare_attachment_payload(attachments, record_id, existing_attachments)
+            att_payload = self.prepare_attachment_payload(attachments, supdoc_id, existing_attachments)
         except Exception as e:
             self.logger.error(f"Failed to prepare attachment payload for record {record_id}: {e.__repr__()}")
             return
@@ -437,22 +439,22 @@ class IntacctSink(HotglueSink):
         if att_payload:
             try:
                 # Check if the folder exists
-                check_folder = {"get": {"@object": "supdocfolder", "@key": record_id}}
+                check_folder = {"get": {"@object": "supdocfolder", "@key": supdoc_id}}
                 folder_response = self.request_api("POST", request_data=check_folder)
                 folder_exists = folder_response.get("data", {}).get("supdocfolder")
 
                 if folder_exists:
-                    self.logger.info(f"Folder with name {record_id} already exists.")
+                    self.logger.info(f"Folder with name {supdoc_id} already exists.")
                 else:
                     # Create folder if it doesn't exist
-                    folder_payload = {"create_supdocfolder": {"supdocfoldername": record_id}}
+                    folder_payload = {"create_supdocfolder": {"supdocfoldername": supdoc_id}}
                     self.request_api("POST", request_data=folder_payload)
-                    self.logger.info(f"Created folder with name {record_id}.")
+                    self.logger.info(f"Created folder with name {supdoc_id}.")
 
                 # Post the attachments
                 self.request_api("POST", request_data=att_payload)
                 self.logger.info(f"Attachments for record {record_id} have been posted successfully.")
-                return record_id
+                return supdoc_id
             except Exception as e:
                 raise Exception(f"Failed to post attachments or folder for record {record_id}: {e.__repr__()}")
 
