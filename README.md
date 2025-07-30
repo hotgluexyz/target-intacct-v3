@@ -1,7 +1,7 @@
 # target-intacct-v3
 
-`target-intacct-v3` is a Singer target for Intacct V3.
-
+**target-intacct-v3** is a Singer Target for writing data to Sage Intacct.
+**target-intacct-v3** can be run on [hotglue](https://hotglue.com), an embedded integration platform for running Singer Taps and Targets.
 
 ## Installation
 
