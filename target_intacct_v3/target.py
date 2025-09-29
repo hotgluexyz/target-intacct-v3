@@ -42,7 +42,7 @@ class TargetIntacctV3(TargetHotglue):
             th.BooleanType,
         ),
     ).to_dict()
-    SINK_TYPES = [Suppliers, APAdjustments, JournalEntries, Bills, PurchaseInvoices, BillPayment, PurchaseOrders]
+    SINK_TYPES = [VendorSink]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
