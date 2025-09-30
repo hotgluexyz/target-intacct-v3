@@ -26,12 +26,6 @@ class VendorSchemaMapper(BaseMapper):
         self._map_fields(payload)
 
         return payload
-    
-    def _map_is_active(self):
-        is_active = self.record.get("isActive")
-        if is_active is not None:
-            return {"STATUS": "active" if is_active else "inactive"}
-        return {}
 
     def _map_contact_info(self):
         contact_info = {}
