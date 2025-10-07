@@ -25,13 +25,16 @@ class BaseMapper:
     def _find_existing_record(self, reference_list):
         """Finds an existing record in the reference data by matching internal.
         """
+        location_id = self._map_subsidiary()["LOCATIONID"]
+        if location_id == "TOP_LEVEL":
+            location_id = None
 
         for existing_record_pk_mapping in self.existing_record_pk_mappings:
             record_id = self.record.get(existing_record_pk_mapping["record_field"])
             if record_id:
                 found_record = next(
                     (intacct_record for intacct_record in reference_list
-                    if str(intacct_record[existing_record_pk_mapping["intacct_field"]]) == str(record_id)),
+                    if location_id == intacct_record["MEGAENTITYID"] and str(intacct_record[existing_record_pk_mapping["intacct_field"]]) == str(record_id)),
                     None
                 )
                 if existing_record_pk_mapping["required_if_present"] and found_record is None:
@@ -49,6 +52,32 @@ class BaseMapper:
             }
 
         return {}
+
+    def _map_subsidiary(self):
+        found_subsidiary = None
+
+        subsidiary_id = self.record.get("subsidiaryId")
+        if subsidiary_id:
+            found_subsidiary = next(
+                    (intacct_record for intacct_record in self.reference_data.get("Subsidiaries", [])
+                    if str(intacct_record["LOCATIONID"]) == str(subsidiary_id)),
+                    None
+                )
+
+        subsidiary_name = self.record.get("subsidiaryName")
+        if found_subsidiary is None and subsidiary_name:
+            found_subsidiary = next(
+                    (intacct_record for intacct_record in self.reference_data.get("Subsidiaries", [])
+                    if str(intacct_record["NAME"]) == str(subsidiary_name)),
+                    None
+                )
+
+        if found_subsidiary is None and (subsidiary_id or subsidiary_name):
+            raise RecordNotFound(f"Subsidiary not found with subsidiaryId='{subsidiary_id}' / subsidiaryName='{subsidiary_name}'.")
+
+        return {
+            "LOCATIONID": found_subsidiary["LOCATIONID"] if found_subsidiary else "TOP_LEVEL"
+        }
 
     def _map_fields(self, payload, custom_field_mappings={}):
         field_mappings = self.field_mappings
