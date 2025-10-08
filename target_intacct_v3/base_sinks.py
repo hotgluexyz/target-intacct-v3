@@ -43,6 +43,8 @@ class IntacctBatchSink(HotglueBatchSink):
         # Extract the raw records from the context
         raw_records = context.get("records", [])
 
+        # make sure we're signed into the top level location before fetching reference data
+        self.intacct_client.current_location_id = "TOP_LEVEL"
         reference_data = self.get_batch_reference_data(raw_records)
 
         records = []
