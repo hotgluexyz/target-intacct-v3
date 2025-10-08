@@ -18,6 +18,7 @@ class VendorSchemaMapper(BaseMapper):
     def to_intacct(self) -> Dict:
         payload = {
             **self._map_internal_id(),
+            **self._map_subsidiary(),
             **self._map_contact_info(),
             **self._map_is_active()
         }

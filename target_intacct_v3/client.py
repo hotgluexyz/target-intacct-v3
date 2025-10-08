@@ -13,6 +13,7 @@ class IntacctClient:
     endpoint = ""
 
     def __init__(self, config: dict, logger: Logger):
+        self._current_location_id = None
         self.logger = logger
         self.config = config
         self.session_id = None
@@ -25,12 +26,29 @@ class IntacctClient:
         """Return the http headers needed."""
         headers = {"content-type": "application/xml"}
         return headers
+
+    def invalidate_session(self):
+        self.session_id = None
+        self.session_timeout_timestamp = None
+
+    @property
+    def current_location_id(self):
+        return self._current_location_id
+
+    @current_location_id.setter
+    def current_location_id(self, new_value):
+        """The setter for the '_current_location_id' property and invalidate the session if necessary."""
+        if new_value == "TOP_LEVEL":
+            new_value = None
+
+        if new_value != self._current_location_id:
+            self.invalidate_session()
+            self._current_location_id = new_value
     
     def get_login_request_body(self):
         user_id = self.config.get("user_id")
         company_id = self.config.get("company_id")
         user_password = self.config.get("user_password")
-        location_id = self.config.get("location_id")
         sender_id = self.config.get("sender_id")
         sender_password = self.config.get("sender_password")
 
@@ -40,11 +58,11 @@ class IntacctClient:
             "password": user_password,
         }
 
+        self.logger.info(f"Current location id: {self.current_location_id if self.current_location_id else 'TOP_LEVEL'}")
         if (
-            self.config.get("use_locations")
-            and location_id
+            self.current_location_id
         ):
-            login_payload["locationid"] = location_id
+            login_payload["locationid"] = self.current_location_id
 
         request_body = {
             "request": {
@@ -144,6 +162,10 @@ class IntacctClient:
         self, request_data
     ):
         """Request records from XML endpoint(s), returning response records."""
+        # check if session is still valid before sending any request
+        if not self.is_session_valid():
+            self.login()
+
         # wrap and format payload
         xml_request_data = self.format_payload(request_data)
         # send request
@@ -164,6 +186,10 @@ class IntacctClient:
         return result
 
     def make_batch_request(self, request_data):
+        # check if session is still valid before sending any request
+        if not self.is_session_valid():
+            self.login()
+        
         dict_body = self.get_request_body(content=request_data)
         
         # transform payload to xml
@@ -221,10 +247,6 @@ class IntacctClient:
         http_method = "POST"
         headers = self.http_headers
         url = self.base_url
-
-        # check if session is still valid before sending any request
-        if not self.is_session_valid():
-            self.login()
 
         if "attachmentdata" not in str(request_data):
             self.logger.info(f"Making request to {url} with payload: {request_data}")
