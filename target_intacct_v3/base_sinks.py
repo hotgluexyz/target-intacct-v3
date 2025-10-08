@@ -1,5 +1,6 @@
 import json
 from typing import Dict, List, Optional
+from collections import defaultdict
 
 from singer_sdk.plugin_base import PluginBase
 
@@ -66,14 +67,21 @@ class IntacctBatchSink(HotglueBatchSink):
         if not records:
             return
         
-        response = self.make_batch_request(records)
-        # Handle the batch response 
-        result = self.handle_batch_response(response, records)
-        state_updates = result.get("state_updates", [])
+        # group records by locationId because each different location needs a new session
+        records_by_location = defaultdict(list)
+        for record in records:
+            records_by_location[record['locationId']].append(record)
 
-        # Update the latest state for each state update in the response
-        for state_update in state_updates:
-            self.update_state(state_update)
+        for location_id, location_records in records_by_location.items():
+            self.intacct_client.current_location_id = location_id
+            response = self.make_batch_request(location_records)
+            # Handle the batch response 
+            result = self.handle_batch_response(response, location_records)
+            state_updates = result.get("state_updates", [])
+
+            # Update the latest state for each state update in the response
+            for state_update in state_updates:
+                self.update_state(state_update)
 
     def make_batch_request(self, records: List[Dict]):
         records_payload = []
