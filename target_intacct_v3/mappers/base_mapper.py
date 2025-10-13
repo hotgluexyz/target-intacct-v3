@@ -104,3 +104,59 @@ class BaseMapper:
         if is_active is not None:
             return {"STATUS": "active" if is_active else "inactive"}
         return {}
+
+    def _find_entity(self, entity_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True):
+        found_entity = None
+        no_value = self.record.get(record_no_field) if record_no_field else None
+        id_value = self.record.get(record_id_field) if record_id_field else None
+        name_value = self.record.get(record_name_field) if record_name_field else None
+
+        if no_value is None and id_value is None and name_value is None:
+            if required:
+                raise RecordNotFound(f"{entity_name} is required and none of the matching fields are present: {record_no_field}/{record_id_field}/{record_name_field}")
+            return {}
+        
+        reference_list = self.reference_data.get(entity_name, [])
+
+        should_match_subsidiary = subsidiary_id is not None
+        valid_subsidiaries = [subsidiary_id, "TOP_LEVEL"] if subsidiary_id not in ["TOP_LEVEL", None] else ["TOP_LEVEL"]
+
+        # iterate over valid subsidiaries because we wanna first look for the entity
+        # at the subsidiary level and then at the top level
+        for subsidiary in valid_subsidiaries:
+            if no_value:
+                found_entity = next(
+                    (entity for entity in reference_list
+                    if entity["RECORDNO"] == no_value and 
+                        ((should_match_subsidiary and entity["MEGAENTITYID"] == subsidiary) or not should_match_subsidiary)),
+                    None
+                )
+            
+            if found_entity is None and id_value:
+                found_entity = next(
+                    (entity for entity in reference_list
+                    if entity["ENTITYID"] == id_value and 
+                        ((should_match_subsidiary and entity["MEGAENTITYID"] == subsidiary) or not should_match_subsidiary)),
+                    None
+                )
+            
+            if found_entity is None and name_value:
+                found_entity = next(
+                    (entity for entity in reference_list
+                    if entity["ENTITYNAME"] == name_value and 
+                        ((should_match_subsidiary and entity["MEGAENTITYID"] == subsidiary) or not should_match_subsidiary)),
+                    None
+                )
+            
+            if found_entity:
+                return found_entity
+
+        if found_entity is None:
+            fields = [(record_no_field, no_value), (record_id_field, id_value), (record_name_field, name_value)]
+            raise RecordNotFound(f"{entity_name} could not be found in Intacct with {' / '.join([f'{field}={value}' for field, value in fields if field and value])}")
+        
+        return {}
+
+    def _map_sub_record(self, entity_name, target_field_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True):
+        found_entity = self._find_entity(entity_name, record_no_field, record_id_field, record_name_field, subsidiary_id, required)
+        return {target_field_name: found_entity["ENTITYID"]} if found_entity else {}
