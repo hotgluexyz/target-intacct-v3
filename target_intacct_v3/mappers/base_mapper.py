@@ -20,14 +20,13 @@ class BaseMapper:
         self.record = record
         self.sink_name = sink_name
         self.reference_data = reference_data
+        self.subsidiary_id = self._get_subsidiary_id()
         self.existing_record = self._find_existing_record(self.reference_data.get(self.sink_name, []))
 
     def _find_existing_record(self, reference_list):
         """Finds an existing record in the reference data by matching internal.
         """
-        location_id = self._map_subsidiary()["LOCATIONID"]
-        if location_id == "TOP_LEVEL":
-            location_id = None
+        location_id = self.subsidiary_id
 
         for existing_record_pk_mapping in self.existing_record_pk_mappings:
             record_id = self.record.get(existing_record_pk_mapping["record_field"])
@@ -53,7 +52,7 @@ class BaseMapper:
 
         return {}
 
-    def _map_subsidiary(self):
+    def _get_subsidiary_id(self):
         found_subsidiary = None
 
         subsidiary_id = self.record.get("subsidiaryId")
@@ -75,8 +74,11 @@ class BaseMapper:
         if found_subsidiary is None and (subsidiary_id or subsidiary_name):
             raise RecordNotFound(f"Subsidiary not found with subsidiaryId='{subsidiary_id}' / subsidiaryName='{subsidiary_name}'.")
 
+        return found_subsidiary["LOCATIONID"] if found_subsidiary else "TOP_LEVEL"
+
+    def _map_subsidiary(self):
         return {
-            "LOCATIONID": found_subsidiary["LOCATIONID"] if found_subsidiary else "TOP_LEVEL"
+            "LOCATIONID": self.subsidiary_id
         }
 
     def _map_fields(self, payload, custom_field_mappings={}):
