@@ -96,3 +96,9 @@ class BaseMapper:
                         payload[payload_key] = record_value.isoformat()
                     else:
                         payload[payload_key] = record_value
+
+    def _map_is_active(self):
+        is_active = self.record.get("isActive")
+        if is_active is not None:
+            return {"STATUS": "active" if is_active else "inactive"}
+        return {}

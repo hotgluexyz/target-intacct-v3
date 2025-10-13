@@ -8,6 +8,7 @@ from target_hotglue.target import TargetHotglue
 
 from target_intacct_v3.client import IntacctClient
 from target_intacct_v3.sinks.vendor_sink import VendorSink
+from target_intacct_v3.sinks.item_sink import ItemSink
 
 
 class TargetIntacctV3(TargetHotglue):
@@ -42,7 +43,7 @@ class TargetIntacctV3(TargetHotglue):
             th.BooleanType,
         ),
     ).to_dict()
-    SINK_TYPES = [VendorSink]
+    SINK_TYPES = [VendorSink, ItemSink]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
