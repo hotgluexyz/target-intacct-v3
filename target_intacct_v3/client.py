@@ -12,6 +12,63 @@ class IntacctClient:
     base_url = "https://api.intacct.com/ia/xml/xmlgw.phtml"
     endpoint = ""
 
+    INTACCT_OBJECT_MAPPING = {
+        "GLACCOUNT": {
+            "entity_id_field": "ACCOUNTNO",
+            "entity_name_field": "TITLE",
+            "fields": ["RECORDNO", "ACCOUNTNO", "TITLE", "MEGAENTITYID"]
+        },
+        "LOCATIONENTITY": {
+            "entity_id_field": "LOCATIONID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "LOCATIONID", "NAME"]
+        },
+        "CLASS": {
+            "entity_id_field": "CLASSID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "CLASSID", "NAME", "MEGAENTITYID"]
+        },
+        "DEPARTMENT": {
+            "entity_id_field": "DEPARTMENTID",
+            "entity_name_field": "TITLE",
+            "fields": ["RECORDNO", "DEPARTMENTID", "TITLE"]
+        },
+        "PROJECT": {
+            "entity_id_field": "PROJECTID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "PROJECTID", "NAME", "MEGAENTITYID"]
+        },
+        "TASK": {
+            "entity_id_field": "TASKID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "TASKID", "NAME"]
+        },
+        "LOCATION": {
+            "entity_id_field": "LOCATIONID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "LOCATIONID", "NAME"]
+        },
+        "EMPLOYEE": {
+            "entity_id_field": "EMPLOYEEID",
+            "entity_name_field": "TITLE",
+            "fields": ["RECORDNO", "EMPLOYEEID", "TITLE", "MEGAENTITYID"]
+        },
+        "ITEM": {
+            "entity_id_field": "ITEMID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "ITEMID", "NAME", "MEGAENTITYID"]
+        },
+        "VENDOR": {
+            "entity_id_field": "VENDORID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "NAME", "VENDORID", "MEGAENTITYID"]
+        },
+        "APBILL": {
+            "entity_id_field": "RECORDID",
+            "fields": ["RECORDNO", "RECORDID", "MEGAENTITYID"]
+        }
+    }
+
     def __init__(self, config: dict, logger: Logger):
         self._current_location_id = None
         self.logger = logger
@@ -272,7 +329,12 @@ class IntacctClient:
             }
         }
 
-    def get_records(self, intacct_object, fields, filter=None, docparid=None):
+    def get_records(self, intacct_object, filter=None, docparid=None):
+        if intacct_object not in self.INTACCT_OBJECT_MAPPING:
+            raise ValueError(f"Invalid Intacct object: {intacct_object}")
+
+        object_mapping = self.INTACCT_OBJECT_MAPPING[intacct_object]
+
         if filter is None:
             filter = {}
  
@@ -284,7 +346,7 @@ class IntacctClient:
             data = {
                 "query": {
                     "object": intacct_object,
-                    "select": {"field": fields},
+                    "select": {"field": object_mapping["fields"]},
                     "options": {"showprivate": "true"},
                     "pagesize": pagesize,
                     "offset": offset,
@@ -303,6 +365,13 @@ class IntacctClient:
                 # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
                 if isinstance(intacct_objects, dict):
                     intacct_objects = [intacct_objects]
+
+                for intacct_object in intacct_objects:
+                    intacct_object["ENTITYID"] = intacct_object[object_mapping["entity_id_field"]]
+                    if "entity_name_field" in object_mapping:
+                        intacct_object["ENTITYNAME"] = intacct_object[object_mapping["entity_name_field"]]
+                    if "MEGAENTITYID" in intacct_object and intacct_object["MEGAENTITYID"] is None:
+                        intacct_object["MEGAENTITYID"] = "TOP_LEVEL"
 
                 total_intacct_objects.extend(intacct_objects)
 

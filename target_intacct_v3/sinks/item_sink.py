@@ -37,7 +37,7 @@ class ItemSink(IntacctBatchSink):
 
         if item_filters:
             item_filter = {"or": {"in": item_filters}} if len(item_filters) > 1 else {"in": item_filters}
-            existing_items = self.intacct_client.get_records(self.record_type, fields=["RECORDNO", "NAME", "ITEMID", "MEGAENTITYID"], filter=item_filter)
+            existing_items = self.intacct_client.get_records(self.record_type, filter=item_filter)
         
         return {**self._target.reference_data, self.name: existing_items}
     
