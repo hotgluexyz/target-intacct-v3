@@ -388,8 +388,132 @@ class IntacctClient:
         
         return total_intacct_objects
 
-    # def get_vendors(self):
-    #     if IntacctSink.vendors is None:
-    #         vendors = self.get_records("VENDOR", ["VENDORID", "NAME"])
-    #         IntacctSink.vendors = dictify(vendors, "NAME", "VENDORID")
-    #     return IntacctSink.vendors
+    def get_attachment_folders(self, folder_ids): 
+        pagesize = 1000
+        offset = 0
+        total_intacct_objects = []
+
+        if len(folder_ids) == 0:
+            return []
+
+        if len(folder_ids) == 1:
+            filters = {
+                "expression": {
+                    "field": "name",
+                    "operator": "=",
+                    "value": folder_ids[0]
+                }
+            }
+        else:
+            filters = {
+                "logical": {
+                    "@logical_operator": "or",
+                    "expression": [{
+                        "field": "name",
+                        "operator": "=",
+                        "value": folder_id
+                    } for folder_id in folder_ids]
+                }
+            }
+
+        while True:
+            data = {
+                "get_list": {
+                    "@object": "supdocfolder",
+                    "@showprivate": "true",
+                    "@maxitems": pagesize,
+                    "@start": offset,
+                    "filter": filters,
+                }
+            }
+
+            try:
+                response = self.request_api(data)
+                count = int(response.get("listtype", {}).get("@total", 0))
+                intacct_objects = response.get("data", {}).get("supdocfolder", [])
+                # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
+                if isinstance(intacct_objects, dict):
+                    intacct_objects = [intacct_objects]
+
+                folder_names = [intacct_object["name"] for intacct_object in intacct_objects]
+
+                total_intacct_objects.extend(folder_names)
+
+                if offset + pagesize >= count:
+                    break
+
+                offset += pagesize
+            except (KeyError, ValueError, TypeError) as e:
+                self.logger.error(f"Failed to retrieve records: {e.__repr__()}")
+                raise FatalAPIError(f"Error while fetching records: {e.__repr__()}")
+        
+        return total_intacct_objects
+
+    def get_attachments(self, supdoc_ids): 
+        pagesize = 1000
+        offset = 0
+        total_intacct_objects = []
+
+        if len(supdoc_ids) == 0:
+            return []
+
+        if len(supdoc_ids) == 1:
+            filters = {
+                "expression": {
+                    "field": "supdocid",
+                    "operator": "=",
+                    "value": supdoc_ids[0]
+                }
+            }
+        else:
+            filters = {
+                "logical": {
+                    "@logical_operator": "or",
+                    "expression": [{
+                        "field": "supdocid",
+                        "operator": "=",
+                        "value": supdoc_id
+                    } for supdoc_id in supdoc_ids]
+                }
+            }
+
+        while True:
+            data = {
+                "get_list": {
+                    "@object": "supdoc",
+                    "@showprivate": "true",
+                    "@maxitems": pagesize,
+                    "@start": offset,
+                    "filter": filters,
+                }
+            }
+
+            try:
+                response = self.request_api(data)
+                count = int(response.get("listtype", {}).get("@total", 0))
+                intacct_objects = response.get("data", {}).get("supdoc", [])
+                # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
+                if isinstance(intacct_objects, dict):
+                    intacct_objects = [intacct_objects]
+
+                total_intacct_objects.extend(intacct_objects)
+
+                if offset + pagesize >= count:
+                    break
+
+                offset += pagesize
+            except (KeyError, ValueError, TypeError) as e:
+                self.logger.error(f"Failed to retrieve records: {e.__repr__()}")
+                raise FatalAPIError(f"Error while fetching records: {e.__repr__()}")
+        
+        return total_intacct_objects
+
+    def get_attachment_folder_create_payload(self, folder_name):
+        return {
+            "function": {
+                "@controlid": f"create_folder_{folder_name}",
+                "create_supdocfolder": {
+                    "supdocfoldername": folder_name
+                }
+            }
+        }
