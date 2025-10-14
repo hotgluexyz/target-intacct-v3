@@ -145,7 +145,7 @@ class IntacctClient:
         
         return request_body
 
-    def get_request_body(self, content = {}):
+    def get_request_body(self, content = {}, is_atomic_request = False):
         sender_id = self.config.get("sender_id")
         sender_password = self.config.get("sender_password")
         request_body = {
@@ -165,6 +165,9 @@ class IntacctClient:
             "authentication": {"sessionid": self.session_id},
             "content": content,
         }
+
+        if is_atomic_request:
+            request_body["request"]["operation"]["@transaction"] = "true"
 
         return request_body
 
@@ -242,12 +245,12 @@ class IntacctClient:
 
         return result
 
-    def make_batch_request(self, request_data):
+    def make_batch_request(self, request_data, is_atomic_request = False):
         # check if session is still valid before sending any request
         if not self.is_session_valid():
             self.login()
         
-        dict_body = self.get_request_body(content=request_data)
+        dict_body = self.get_request_body(content=request_data, is_atomic_request=is_atomic_request)
         
         # transform payload to xml
         xml_request_data = xmltodict.unparse(dict_body).encode("utf-8")
