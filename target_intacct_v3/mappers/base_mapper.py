@@ -6,6 +6,10 @@ class InvalidInputError(Exception):
 class RecordNotFound(InvalidInputError):
     pass
 
+def format_supdoc_id(record_type: str, record_id: str) -> str:
+    record_id = record_id.replace("-","")
+    return f"{record_type}-{record_id}"[-20:]  # supdocid only allows 20 chars
+
 class BaseMapper:
     """A base class responsible for mapping a record ingested in the unified schema format to a payload for Intacct"""
     existing_record_pk_mappings = []
