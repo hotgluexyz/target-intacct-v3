@@ -37,7 +37,7 @@ class VendorSink(IntacctBatchSink):
 
         if vendor_filters:
             vendor_filter = {"or": {"in": vendor_filters}} if len(vendor_filters) > 1 else {"in": vendor_filters}
-            existing_vendors = self.intacct_client.get_records("VENDOR", fields=["RECORDNO", "NAME", "VENDORID", "MEGAENTITYID"], filter=vendor_filter)
+            existing_vendors = self.intacct_client.get_records("VENDOR", filter=vendor_filter)
 
         return {**self._target.reference_data, self.name: existing_vendors}
     

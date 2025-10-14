@@ -6,6 +6,10 @@ class InvalidInputError(Exception):
 class RecordNotFound(InvalidInputError):
     pass
 
+def format_supdoc_id(record_type: str, record_id: str) -> str:
+    record_id = record_id.replace("-","")
+    return f"{record_type}-{record_id}"[-20:]  # supdocid only allows 20 chars
+
 class BaseMapper:
     """A base class responsible for mapping a record ingested in the unified schema format to a payload for Intacct"""
     existing_record_pk_mappings = []
@@ -20,14 +24,13 @@ class BaseMapper:
         self.record = record
         self.sink_name = sink_name
         self.reference_data = reference_data
+        self.subsidiary_id = self._get_subsidiary_id()
         self.existing_record = self._find_existing_record(self.reference_data.get(self.sink_name, []))
 
     def _find_existing_record(self, reference_list):
         """Finds an existing record in the reference data by matching internal.
         """
-        location_id = self._map_subsidiary()["LOCATIONID"]
-        if location_id == "TOP_LEVEL":
-            location_id = None
+        location_id = self.subsidiary_id
 
         for existing_record_pk_mapping in self.existing_record_pk_mappings:
             record_id = self.record.get(existing_record_pk_mapping["record_field"])
@@ -53,7 +56,7 @@ class BaseMapper:
 
         return {}
 
-    def _map_subsidiary(self):
+    def _get_subsidiary_id(self):
         found_subsidiary = None
 
         subsidiary_id = self.record.get("subsidiaryId")
@@ -75,8 +78,11 @@ class BaseMapper:
         if found_subsidiary is None and (subsidiary_id or subsidiary_name):
             raise RecordNotFound(f"Subsidiary not found with subsidiaryId='{subsidiary_id}' / subsidiaryName='{subsidiary_name}'.")
 
+        return found_subsidiary["LOCATIONID"] if found_subsidiary else "TOP_LEVEL"
+
+    def _map_subsidiary(self):
         return {
-            "LOCATIONID": found_subsidiary["LOCATIONID"] if found_subsidiary else "TOP_LEVEL"
+            "LOCATIONID": self.subsidiary_id
         }
 
     def _map_fields(self, payload, custom_field_mappings={}):
@@ -93,7 +99,7 @@ class BaseMapper:
                 else:
                     record_value = self.record.get(record_key)
                     if isinstance(record_value, datetime.datetime):
-                        payload[payload_key] = record_value.isoformat()
+                        payload[payload_key] = record_value.strftime("%m-%d-%Y")
                     else:
                         payload[payload_key] = record_value
 
@@ -102,3 +108,59 @@ class BaseMapper:
         if is_active is not None:
             return {"STATUS": "active" if is_active else "inactive"}
         return {}
+
+    def _find_entity(self, entity_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True):
+        found_entity = None
+        no_value = self.record.get(record_no_field) if record_no_field else None
+        id_value = self.record.get(record_id_field) if record_id_field else None
+        name_value = self.record.get(record_name_field) if record_name_field else None
+
+        if no_value is None and id_value is None and name_value is None:
+            if required:
+                raise RecordNotFound(f"{entity_name} is required and none of the matching fields are present: {record_no_field}/{record_id_field}/{record_name_field}")
+            return {}
+        
+        reference_list = self.reference_data.get(entity_name, [])
+
+        should_match_subsidiary = subsidiary_id is not None
+        valid_subsidiaries = [subsidiary_id, "TOP_LEVEL"] if subsidiary_id not in ["TOP_LEVEL", None] else ["TOP_LEVEL"]
+
+        # iterate over valid subsidiaries because we wanna first look for the entity
+        # at the subsidiary level and then at the top level
+        for subsidiary in valid_subsidiaries:
+            if no_value:
+                found_entity = next(
+                    (entity for entity in reference_list
+                    if entity["RECORDNO"] == no_value and 
+                        ((should_match_subsidiary and entity["MEGAENTITYID"] == subsidiary) or not should_match_subsidiary)),
+                    None
+                )
+            
+            if found_entity is None and id_value:
+                found_entity = next(
+                    (entity for entity in reference_list
+                    if entity["ENTITYID"] == id_value and 
+                        ((should_match_subsidiary and entity["MEGAENTITYID"] == subsidiary) or not should_match_subsidiary)),
+                    None
+                )
+            
+            if found_entity is None and name_value:
+                found_entity = next(
+                    (entity for entity in reference_list
+                    if entity["ENTITYNAME"] == name_value and 
+                        ((should_match_subsidiary and entity["MEGAENTITYID"] == subsidiary) or not should_match_subsidiary)),
+                    None
+                )
+            
+            if found_entity:
+                return found_entity
+
+        if found_entity is None:
+            fields = [(record_no_field, no_value), (record_id_field, id_value), (record_name_field, name_value)]
+            raise RecordNotFound(f"{entity_name} could not be found in Intacct with {' / '.join([f'{field}={value}' for field, value in fields if field and value])}")
+        
+        return {}
+
+    def _map_sub_record(self, entity_name, target_field_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True):
+        found_entity = self._find_entity(entity_name, record_no_field, record_id_field, record_name_field, subsidiary_id, required)
+        return {target_field_name: found_entity["ENTITYID"]} if found_entity else {}

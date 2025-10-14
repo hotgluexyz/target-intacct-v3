@@ -12,6 +12,63 @@ class IntacctClient:
     base_url = "https://api.intacct.com/ia/xml/xmlgw.phtml"
     endpoint = ""
 
+    INTACCT_OBJECT_MAPPING = {
+        "GLACCOUNT": {
+            "entity_id_field": "ACCOUNTNO",
+            "entity_name_field": "TITLE",
+            "fields": ["RECORDNO", "ACCOUNTNO", "TITLE", "MEGAENTITYID"]
+        },
+        "LOCATIONENTITY": {
+            "entity_id_field": "LOCATIONID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "LOCATIONID", "NAME"]
+        },
+        "CLASS": {
+            "entity_id_field": "CLASSID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "CLASSID", "NAME", "MEGAENTITYID"]
+        },
+        "DEPARTMENT": {
+            "entity_id_field": "DEPARTMENTID",
+            "entity_name_field": "TITLE",
+            "fields": ["RECORDNO", "DEPARTMENTID", "TITLE"]
+        },
+        "PROJECT": {
+            "entity_id_field": "PROJECTID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "PROJECTID", "NAME", "MEGAENTITYID"]
+        },
+        "TASK": {
+            "entity_id_field": "TASKID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "TASKID", "NAME"]
+        },
+        "LOCATION": {
+            "entity_id_field": "LOCATIONID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "LOCATIONID", "NAME"]
+        },
+        "EMPLOYEE": {
+            "entity_id_field": "EMPLOYEEID",
+            "entity_name_field": "TITLE",
+            "fields": ["RECORDNO", "EMPLOYEEID", "TITLE", "MEGAENTITYID"]
+        },
+        "ITEM": {
+            "entity_id_field": "ITEMID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "ITEMID", "NAME", "MEGAENTITYID"]
+        },
+        "VENDOR": {
+            "entity_id_field": "VENDORID",
+            "entity_name_field": "NAME",
+            "fields": ["RECORDNO", "NAME", "VENDORID", "MEGAENTITYID"]
+        },
+        "APBILL": {
+            "entity_id_field": "RECORDID",
+            "fields": ["RECORDNO", "RECORDID", "MEGAENTITYID"]
+        }
+    }
+
     def __init__(self, config: dict, logger: Logger):
         self._current_location_id = None
         self.logger = logger
@@ -88,7 +145,7 @@ class IntacctClient:
         
         return request_body
 
-    def get_request_body(self, content = {}):
+    def get_request_body(self, content = {}, is_atomic_request = False):
         sender_id = self.config.get("sender_id")
         sender_password = self.config.get("sender_password")
         request_body = {
@@ -108,6 +165,9 @@ class IntacctClient:
             "authentication": {"sessionid": self.session_id},
             "content": content,
         }
+
+        if is_atomic_request:
+            request_body["request"]["operation"]["@transaction"] = "true"
 
         return request_body
 
@@ -185,12 +245,12 @@ class IntacctClient:
 
         return result
 
-    def make_batch_request(self, request_data):
+    def make_batch_request(self, request_data, is_atomic_request = False):
         # check if session is still valid before sending any request
         if not self.is_session_valid():
             self.login()
         
-        dict_body = self.get_request_body(content=request_data)
+        dict_body = self.get_request_body(content=request_data, is_atomic_request=is_atomic_request)
         
         # transform payload to xml
         xml_request_data = xmltodict.unparse(dict_body).encode("utf-8")
@@ -272,7 +332,12 @@ class IntacctClient:
             }
         }
 
-    def get_records(self, intacct_object, fields, filter=None, docparid=None):
+    def get_records(self, intacct_object, filter=None, docparid=None):
+        if intacct_object not in self.INTACCT_OBJECT_MAPPING:
+            raise ValueError(f"Invalid Intacct object: {intacct_object}")
+
+        object_mapping = self.INTACCT_OBJECT_MAPPING[intacct_object]
+
         if filter is None:
             filter = {}
  
@@ -284,7 +349,7 @@ class IntacctClient:
             data = {
                 "query": {
                     "object": intacct_object,
-                    "select": {"field": fields},
+                    "select": {"field": object_mapping["fields"]},
                     "options": {"showprivate": "true"},
                     "pagesize": pagesize,
                     "offset": offset,
@@ -304,6 +369,13 @@ class IntacctClient:
                 if isinstance(intacct_objects, dict):
                     intacct_objects = [intacct_objects]
 
+                for intacct_object in intacct_objects:
+                    intacct_object["ENTITYID"] = intacct_object[object_mapping["entity_id_field"]]
+                    if "entity_name_field" in object_mapping:
+                        intacct_object["ENTITYNAME"] = intacct_object[object_mapping["entity_name_field"]]
+                    if "MEGAENTITYID" in intacct_object and intacct_object["MEGAENTITYID"] is None:
+                        intacct_object["MEGAENTITYID"] = "TOP_LEVEL"
+
                 total_intacct_objects.extend(intacct_objects)
 
                 if offset + pagesize >= count:
@@ -316,8 +388,132 @@ class IntacctClient:
         
         return total_intacct_objects
 
-    # def get_vendors(self):
-    #     if IntacctSink.vendors is None:
-    #         vendors = self.get_records("VENDOR", ["VENDORID", "NAME"])
-    #         IntacctSink.vendors = dictify(vendors, "NAME", "VENDORID")
-    #     return IntacctSink.vendors
+    def get_attachment_folders(self, folder_ids): 
+        pagesize = 1000
+        offset = 0
+        total_intacct_objects = []
+
+        if len(folder_ids) == 0:
+            return []
+
+        if len(folder_ids) == 1:
+            filters = {
+                "expression": {
+                    "field": "name",
+                    "operator": "=",
+                    "value": folder_ids[0]
+                }
+            }
+        else:
+            filters = {
+                "logical": {
+                    "@logical_operator": "or",
+                    "expression": [{
+                        "field": "name",
+                        "operator": "=",
+                        "value": folder_id
+                    } for folder_id in folder_ids]
+                }
+            }
+
+        while True:
+            data = {
+                "get_list": {
+                    "@object": "supdocfolder",
+                    "@showprivate": "true",
+                    "@maxitems": pagesize,
+                    "@start": offset,
+                    "filter": filters,
+                }
+            }
+
+            try:
+                response = self.request_api(data)
+                count = int(response.get("listtype", {}).get("@total", 0))
+                intacct_objects = response.get("data", {}).get("supdocfolder", [])
+                # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
+                if isinstance(intacct_objects, dict):
+                    intacct_objects = [intacct_objects]
+
+                folder_names = [intacct_object["name"] for intacct_object in intacct_objects]
+
+                total_intacct_objects.extend(folder_names)
+
+                if offset + pagesize >= count:
+                    break
+
+                offset += pagesize
+            except (KeyError, ValueError, TypeError) as e:
+                self.logger.error(f"Failed to retrieve records: {e.__repr__()}")
+                raise FatalAPIError(f"Error while fetching records: {e.__repr__()}")
+        
+        return total_intacct_objects
+
+    def get_attachments(self, supdoc_ids): 
+        pagesize = 1000
+        offset = 0
+        total_intacct_objects = []
+
+        if len(supdoc_ids) == 0:
+            return []
+
+        if len(supdoc_ids) == 1:
+            filters = {
+                "expression": {
+                    "field": "supdocid",
+                    "operator": "=",
+                    "value": supdoc_ids[0]
+                }
+            }
+        else:
+            filters = {
+                "logical": {
+                    "@logical_operator": "or",
+                    "expression": [{
+                        "field": "supdocid",
+                        "operator": "=",
+                        "value": supdoc_id
+                    } for supdoc_id in supdoc_ids]
+                }
+            }
+
+        while True:
+            data = {
+                "get_list": {
+                    "@object": "supdoc",
+                    "@showprivate": "true",
+                    "@maxitems": pagesize,
+                    "@start": offset,
+                    "filter": filters,
+                }
+            }
+
+            try:
+                response = self.request_api(data)
+                count = int(response.get("listtype", {}).get("@total", 0))
+                intacct_objects = response.get("data", {}).get("supdoc", [])
+                # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
+                if isinstance(intacct_objects, dict):
+                    intacct_objects = [intacct_objects]
+
+                total_intacct_objects.extend(intacct_objects)
+
+                if offset + pagesize >= count:
+                    break
+
+                offset += pagesize
+            except (KeyError, ValueError, TypeError) as e:
+                self.logger.error(f"Failed to retrieve records: {e.__repr__()}")
+                raise FatalAPIError(f"Error while fetching records: {e.__repr__()}")
+        
+        return total_intacct_objects
+
+    def get_attachment_folder_create_payload(self, folder_name):
+        return {
+            "function": {
+                "@controlid": f"create_folder_{folder_name}",
+                "create_supdocfolder": {
+                    "supdocfoldername": folder_name
+                }
+            }
+        }

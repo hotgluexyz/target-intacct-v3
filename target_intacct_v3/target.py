@@ -9,6 +9,7 @@ from target_hotglue.target import TargetHotglue
 from target_intacct_v3.client import IntacctClient
 from target_intacct_v3.sinks.vendor_sink import VendorSink
 from target_intacct_v3.sinks.item_sink import ItemSink
+from target_intacct_v3.sinks.bill_sink import BillSink
 
 
 class TargetIntacctV3(TargetHotglue):
@@ -43,7 +44,7 @@ class TargetIntacctV3(TargetHotglue):
             th.BooleanType,
         ),
     ).to_dict()
-    SINK_TYPES = [VendorSink, ItemSink]
+    SINK_TYPES = [VendorSink, ItemSink, BillSink]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -66,12 +67,12 @@ class TargetIntacctV3(TargetHotglue):
                 self.logger.info(f"Snapshot not found or not readable.")
 
         reference_data = {}
-        reference_data["Accounts"] = self.intacct_client.get_records("GLACCOUNT", fields=["RECORDNO", "ACCOUNTNO", "TITLE"])
-        reference_data["Subsidiaries"] = self.intacct_client.get_records("LOCATIONENTITY", fields=["RECORDNO", "LOCATIONID", "NAME"])
-        reference_data["Classes"] = self.intacct_client.get_records("CLASS", fields=["CLASSID", "NAME"])
-        reference_data["Departments"] = self.intacct_client.get_records("DEPARTMENT", fields=["DEPARTMENTID", "TITLE"])
-        reference_data["Projects"] = self.intacct_client.get_records("PROJECT", fields=["PROJECTID", "NAME"])
-        reference_data["Locations"] = self.intacct_client.get_records("LOCATION", fields=["LOCATIONID", "NAME"])
+        reference_data["Accounts"] = self.intacct_client.get_records("GLACCOUNT")
+        reference_data["Subsidiaries"] = self.intacct_client.get_records("LOCATIONENTITY")
+        reference_data["Classes"] = self.intacct_client.get_records("CLASS")
+        reference_data["Departments"] = self.intacct_client.get_records("DEPARTMENT")
+        reference_data["Projects"] = self.intacct_client.get_records("PROJECT")
+        reference_data["Locations"] = self.intacct_client.get_records("LOCATION")
 
         if self.config.get("snapshot_hours"):
             reference_data["write_date"] = datetime.utcnow().isoformat()
