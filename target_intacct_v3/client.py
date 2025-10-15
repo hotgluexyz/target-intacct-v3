@@ -349,7 +349,7 @@ class IntacctClient:
             }
         }
 
-    def get_records(self, intacct_object, filter=None, docparid=None):
+    def get_records(self, intacct_object, filter=None, docparid=None, extra_fields=None):
         if intacct_object not in self.INTACCT_OBJECT_MAPPING:
             raise ValueError(f"Invalid Intacct object: {intacct_object}")
 
@@ -362,11 +362,15 @@ class IntacctClient:
         offset = 0
         total_intacct_objects = []
 
+        fields_to_select = object_mapping["fields"]
+        if extra_fields:
+            fields_to_select.extend(extra_fields)
+
         while True:
             data = {
                 "query": {
                     "object": intacct_object,
-                    "select": {"field": object_mapping["fields"]},
+                    "select": {"field": fields_to_select},
                     "options": {"showprivate": "true"},
                     "pagesize": pagesize,
                     "offset": offset,
