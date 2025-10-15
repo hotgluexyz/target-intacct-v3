@@ -99,7 +99,7 @@ class BaseMapper:
                 else:
                     record_value = self.record.get(record_key)
                     if isinstance(record_value, datetime.datetime):
-                        payload[payload_key] = record_value.strftime("%m-%d-%Y")
+                        payload[payload_key] = record_value.strftime("%m/%d/%Y")
                     else:
                         payload[payload_key] = record_value
 
