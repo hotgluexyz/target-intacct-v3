@@ -66,6 +66,23 @@ class IntacctClient:
         "APBILL": {
             "entity_id_field": "RECORDID",
             "fields": ["RECORDNO", "RECORDID", "MEGAENTITYID"]
+        },
+        "APPYMT": {
+            "entity_id_field": "DOCNUMBER",
+            "fields": ["RECORDNO", "DOCNUMBER", "MEGAENTITYID"]
+        },
+        "CHECKINGACCOUNT": {
+            "entity_recordno_field": "BANKACCOUNTNO",
+            "entity_id_field": "BANKACCOUNTID",
+            "fields": ["BANKACCOUNTNO", "BANKACCOUNTID", "MEGAENTITYID"]
+        },
+        "SAVINGSACCOUNT": {
+            "entity_id_field": "BANKACCOUNTID",
+            "fields": ["RECORDNO", "BANKACCOUNTID", "MEGAENTITYID"]
+        },
+        "CREDITCARD": {
+            "entity_id_field": "CARDID",
+            "fields": ["RECORDNO", "CARDID", "MEGAENTITYID"]
         }
     }
 
@@ -373,6 +390,8 @@ class IntacctClient:
                     intacct_object["ENTITYID"] = intacct_object[object_mapping["entity_id_field"]]
                     if "entity_name_field" in object_mapping:
                         intacct_object["ENTITYNAME"] = intacct_object[object_mapping["entity_name_field"]]
+                    if "entity_recordno_field" in object_mapping:
+                        intacct_object["RECORDNO"] = intacct_object[object_mapping["entity_recordno_field"]]
                     if "MEGAENTITYID" in intacct_object and intacct_object["MEGAENTITYID"] is None:
                         intacct_object["MEGAENTITYID"] = "TOP_LEVEL"
 

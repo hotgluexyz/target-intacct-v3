@@ -73,6 +73,10 @@ class TargetIntacctV3(TargetHotglue):
         reference_data["Departments"] = self.intacct_client.get_records("DEPARTMENT")
         reference_data["Projects"] = self.intacct_client.get_records("PROJECT")
         reference_data["Locations"] = self.intacct_client.get_records("LOCATION")
+        reference_data["CheckingAccounts"] = self.intacct_client.get_records("CHECKINGACCOUNT")
+        reference_data["SavingsAccounts"] = self.intacct_client.get_records("SAVINGSACCOUNT")
+        reference_data["CreditCards"] = self.intacct_client.get_records("CREDITCARD")
+
 
         if self.config.get("snapshot_hours"):
             reference_data["write_date"] = datetime.utcnow().isoformat()
