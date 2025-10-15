@@ -122,7 +122,8 @@ class BaseMapper:
         
         reference_list = self.reference_data.get(entity_name, [])
 
-        should_match_subsidiary = subsidiary_id is not None
+        # if subsidiary is TOP_LEVEL or None we match for all subsidiaries
+        should_match_subsidiary = subsidiary_id not in ["TOP_LEVEL", None]
         valid_subsidiaries = [subsidiary_id, "TOP_LEVEL"] if subsidiary_id not in ["TOP_LEVEL", None] else ["TOP_LEVEL"]
 
         # iterate over valid subsidiaries because we wanna first look for the entity
