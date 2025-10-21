@@ -226,7 +226,8 @@ class BillSink(IntacctBatchPreprocessSingleUpsertSink):
 
         for attachment in attachments:
             input_path = self._target.config.get('input_path')
-            new_attachment = AttachmentSchemaMapper(self.logger).to_intacct(input_path, attachment, existing_attachments)
+            folder_path = f"{input_path}/bill_attachments/{record_id}"
+            new_attachment = AttachmentSchemaMapper(self.logger).to_intacct(folder_path, attachment, existing_attachments)
             if new_attachment:
                 new_attachments.append(new_attachment)
 
