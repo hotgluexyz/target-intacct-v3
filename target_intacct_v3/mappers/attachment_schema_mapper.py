@@ -33,7 +33,7 @@ class AttachmentSchemaMapper:
             data = data.decode()
             attachment_data = data
         else:
-            att_path = f"{input_path}/{new_attachment.get('id')}_{new_attachment.get('name')}"
+            att_path = f"{input_path}/{new_attachment.get('name')}"
             try:
                 with open(att_path, "rb") as attach_file:
                     data = base64.b64encode(attach_file.read()).decode()
