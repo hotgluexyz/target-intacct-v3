@@ -114,13 +114,23 @@ class IntacctBatchSink(HotglueBatchSink):
             record_payload = next((record for record in records if record.get("controlId") == ri.get("controlid")), {})
 
             if ri.get("status") == "success":
+                operation = record_payload.get("operation", "")
+                # if operations starts with create_ or update_ it's legacy behavior
+                if operation.startswith("create_"):
+                    record_id = ri.get("key")
+                elif operation.startswith("update_"):
+                    record_id = record_payload.get("recordId")
+                else:
+                    record_id = ri["data"][self.record_type.lower()]["RECORDNO"]
+
                 state = {
-                    "id": ri["data"][self.record_type.lower()]["RECORDNO"],
+                    "id": record_id,
                     "externalId": record_payload.get("externalId"),
                     "success": True,
                 }
 
-                if record_payload.get("operation") == "update":
+                
+                if "update" in operation:
                     state["is_updated"] = True
                 
                 state_updates.append(state)
