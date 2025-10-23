@@ -411,6 +411,38 @@ class IntacctClient:
         
         return total_intacct_objects
 
+    def read_by_query(self, intacct_object: str, field_list: list, query_filter: str):
+        data = {
+            "readByQuery": {
+                "object": intacct_object,
+                "fields": field_list,
+                "query": query_filter,
+                "pagesize": 1000,
+            }
+        }
+        result_objects = []
+        result_id = ""
+
+        while True:
+            if result_id:
+                data = {"readMore": {"resultId": result_id} }
+            
+            response = self.request_api(data)
+            intacct_objects = response.get("data", {}).get(intacct_object.lower(), [])
+
+            # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
+            if isinstance(intacct_objects, dict):
+                intacct_objects = [intacct_objects]
+
+            result_objects.extend(intacct_objects)
+            result_id = response.get("data", {}).get("@resultId", "")
+
+            remaining_objects = int(response.get("data", {}).get("@numremaining", 0))
+            if not result_id or remaining_objects == 0:
+                break
+
+        return result_objects
+
     def get_attachment_folders(self, folder_ids): 
         pagesize = 1000
         offset = 0
