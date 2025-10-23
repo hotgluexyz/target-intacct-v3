@@ -170,3 +170,19 @@ class BaseMapper:
     def _map_sub_record(self, entity_name, target_field_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True, required_if_present=True):
         found_entity = self._find_entity(entity_name, record_no_field, record_id_field, record_name_field, subsidiary_id, required, required_if_present)
         return {target_field_name: found_entity["ENTITYID"]} if found_entity else {}
+
+    def _map_custom_fields(self):
+        custom_fields = self.record.get("customFields", [])
+        custom_fields_payload = []
+
+        if custom_fields:
+            for custom_field in custom_fields:
+                custom_fields_payload.append({
+                    "customfieldname": custom_field.get("name"),
+                    "customfieldvalue": custom_field.get("value")
+                })
+
+            return {
+                "customfields": { "customfield": custom_fields_payload }
+            }
+        return {}
