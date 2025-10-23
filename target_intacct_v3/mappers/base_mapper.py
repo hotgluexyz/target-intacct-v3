@@ -118,6 +118,23 @@ class BaseMapper:
             return {key_name: "Draft"}
         return {}
 
+    def _map_date_legacy(self, source_field_name, target_field_name, required=True):
+        date_value = self.record.get(source_field_name)
+
+        if not date_value and required:
+            raise RecordNotFound(f"{source_field_name} is required but it was not present in the record")
+
+        if date_value:
+            return {
+                target_field_name: {
+                    "year": date_value.year,
+                    "month": date_value.month,
+                    "day": date_value.day
+                }
+            }
+        
+        return {}
+
     def _order_payload(self, payload, order_keys):
         new_dict = {key: payload.get(key, None) for key in order_keys if key in payload}
         new_dict.update({key: payload[key] for key in payload if key not in order_keys})
