@@ -48,8 +48,12 @@ class BaseMapper:
         
         return None
 
-    def _map_internal_id(self):
+    def _map_internal_id(self, as_key=False):
         if self.existing_record:
+            if as_key:
+                return {
+                    "@key": self.existing_record["RECORDNO"]
+                }
             return {
                 "RECORDNO": self.existing_record["RECORDNO"]
             }
