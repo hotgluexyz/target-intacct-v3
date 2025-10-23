@@ -443,6 +443,32 @@ class IntacctClient:
 
         return result_objects
 
+    def get_existing_vendor_credit_lines(self, vendor_credit_recordnos: list) -> dict:
+        """
+            Given a list of vendor credit recordnos, return a dictionary of vendor credit recordno as key and a list of vendor credit lines as value.
+            The vendor credit lines are grouped by RECORDKEY, which equals to the vendor credit RECORDNO.
+            The vendor credit lines are returned as a list of dictionaries, each dictionary contains the following fields:
+            - RECORDKEY: the vendor credit RECORDNO
+            - LINE_NO: the line number
+            - ITEMDIMKEY: the item dimension key
+            - ACCOUNTNO: the account number
+            - ENTRYDESCRIPTION: the entry description
+        """
+
+        if len(vendor_credit_recordnos) == 0:
+            return {}
+
+        # RECORDKEY equals to the vendor credit RECORDNO
+        vc_lines_filter = f"RECORDKEY in ({','.join(vendor_credit_recordnos)})"
+        exiting_lines = self.read_by_query("APADJUSTMENTITEM", ["RECORDKEY,LINE_NO,ITEMID,ACCOUNTNO,ENTRYDESCRIPTION"], vc_lines_filter)
+
+        # group by RECORDKEY
+        grouped_vc_lines = defaultdict(list)
+        for line in exiting_lines:
+            grouped_vc_lines[line["RECORDKEY"]].append(line)
+
+        return grouped_vc_lines
+
     def get_attachment_folders(self, folder_ids): 
         pagesize = 1000
         offset = 0
