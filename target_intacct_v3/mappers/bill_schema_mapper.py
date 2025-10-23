@@ -35,11 +35,6 @@ class BillSchemaMapper(BaseMapper):
 
         return payload
 
-    def _map_is_draft(self):
-        if self.record.get("isDraft"):
-            return {"ACTION": "Draft"}
-        return {}
-
     def _map_line_items_and_expenses(self, payload):
         mapped_lines = []
         vendor_id = payload["VENDORID"]

@@ -109,6 +109,11 @@ class BaseMapper:
             return {"STATUS": "active" if is_active else "inactive"}
         return {}
 
+    def _map_is_draft(self, key_name="ACTION"):
+        if self.record.get("isDraft"):
+            return {key_name: "Draft"}
+        return {}
+
     def _find_entity(self, entity_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True, required_if_present=True):
         found_entity = None
         no_value = self.record.get(record_no_field) if record_no_field else None
