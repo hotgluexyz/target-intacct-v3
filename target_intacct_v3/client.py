@@ -282,6 +282,11 @@ class IntacctClient:
         parsed_response = self.parse_response(response)
 
         json_response = parsed_response.get("response", {})
+
+        error_message = json_response.get("errormessage")
+        if error_message:
+            raise FatalAPIError(f"Failed to make batch request: {error_message}")
+
         results = json_response.get("operation", {}).get("result", {})
         if isinstance(results, dict):
             results = [results]
