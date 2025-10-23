@@ -118,6 +118,11 @@ class BaseMapper:
             return {key_name: "Draft"}
         return {}
 
+    def _order_payload(self, payload, order_keys):
+        new_dict = {key: payload.get(key, None) for key in order_keys if key in payload}
+        new_dict.update({key: payload[key] for key in payload if key not in order_keys})
+        return new_dict
+
     def _find_entity(self, entity_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True, required_if_present=True):
         found_entity = None
         no_value = self.record.get(record_no_field) if record_no_field else None
