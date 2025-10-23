@@ -11,6 +11,7 @@ from target_intacct_v3.sinks.vendor_sink import VendorSink
 from target_intacct_v3.sinks.item_sink import ItemSink
 from target_intacct_v3.sinks.bill_sink import BillSink
 from target_intacct_v3.sinks.bill_payment_sink import BillPaymentSink
+from target_intacct_v3.sinks.vendor_credit_sink import VendorCreditSink
 
 
 class TargetIntacctV3(TargetHotglue):
@@ -45,7 +46,7 @@ class TargetIntacctV3(TargetHotglue):
             th.BooleanType,
         ),
     ).to_dict()
-    SINK_TYPES = [VendorSink, ItemSink, BillSink, BillPaymentSink]
+    SINK_TYPES = [VendorSink, ItemSink, BillSink, BillPaymentSink, VendorCreditSink]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
