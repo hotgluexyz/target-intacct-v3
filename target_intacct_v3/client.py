@@ -1,5 +1,6 @@
 import datetime as dt
 import json
+from collections import defaultdict
 from logging import Logger
 
 import backoff
@@ -83,6 +84,10 @@ class IntacctClient:
         "CREDITCARD": {
             "entity_id_field": "CARDID",
             "fields": ["RECORDNO", "CARDID", "MEGAENTITYID"]
+        },
+        "APADJUSTMENT": {
+            "entity_id_field": "RECORDID",
+            "fields": ["RECORDNO", "RECORDID", "MEGAENTITYID"]
         }
     }
 
