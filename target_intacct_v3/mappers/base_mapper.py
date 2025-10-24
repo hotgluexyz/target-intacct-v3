@@ -48,8 +48,12 @@ class BaseMapper:
         
         return None
 
-    def _map_internal_id(self):
+    def _map_internal_id(self, as_key=False):
         if self.existing_record:
+            if as_key:
+                return {
+                    "@key": self.existing_record["RECORDNO"]
+                }
             return {
                 "RECORDNO": self.existing_record["RECORDNO"]
             }
@@ -109,6 +113,33 @@ class BaseMapper:
             return {"STATUS": "active" if is_active else "inactive"}
         return {}
 
+    def _map_is_draft(self, key_name="ACTION"):
+        if self.record.get("isDraft"):
+            return {key_name: "Draft"}
+        return {}
+
+    def _map_date_legacy(self, source_field_name, target_field_name, required=True):
+        date_value = self.record.get(source_field_name)
+
+        if not date_value and required:
+            raise RecordNotFound(f"{source_field_name} is required but it was not present in the record")
+
+        if date_value:
+            return {
+                target_field_name: {
+                    "year": date_value.year,
+                    "month": date_value.month,
+                    "day": date_value.day
+                }
+            }
+        
+        return {}
+
+    def _order_payload(self, payload, order_keys):
+        new_dict = {key: payload.get(key, None) for key in order_keys if key in payload}
+        new_dict.update({key: payload[key] for key in payload if key not in order_keys})
+        return new_dict
+
     def _find_entity(self, entity_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True, required_if_present=True):
         found_entity = None
         no_value = self.record.get(record_no_field) if record_no_field else None
@@ -165,3 +196,19 @@ class BaseMapper:
     def _map_sub_record(self, entity_name, target_field_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True, required_if_present=True):
         found_entity = self._find_entity(entity_name, record_no_field, record_id_field, record_name_field, subsidiary_id, required, required_if_present)
         return {target_field_name: found_entity["ENTITYID"]} if found_entity else {}
+
+    def _map_custom_fields(self):
+        custom_fields = self.record.get("customFields", [])
+        custom_fields_payload = []
+
+        if custom_fields:
+            for custom_field in custom_fields:
+                custom_fields_payload.append({
+                    "customfieldname": custom_field.get("name"),
+                    "customfieldvalue": custom_field.get("value")
+                })
+
+            return {
+                "customfields": { "customfield": custom_fields_payload }
+            }
+        return {}

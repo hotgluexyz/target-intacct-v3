@@ -1,5 +1,6 @@
 import datetime as dt
 import json
+from collections import defaultdict
 from logging import Logger
 
 import backoff
@@ -83,6 +84,10 @@ class IntacctClient:
         "CREDITCARD": {
             "entity_id_field": "CARDID",
             "fields": ["RECORDNO", "CARDID", "MEGAENTITYID"]
+        },
+        "APADJUSTMENT": {
+            "entity_id_field": "RECORDID",
+            "fields": ["RECORDNO", "RECORDID", "MEGAENTITYID"]
         }
     }
 
@@ -277,6 +282,11 @@ class IntacctClient:
         parsed_response = self.parse_response(response)
 
         json_response = parsed_response.get("response", {})
+
+        error_message = json_response.get("errormessage")
+        if error_message:
+            raise FatalAPIError(f"Failed to make batch request: {error_message}")
+
         results = json_response.get("operation", {}).get("result", {})
         if isinstance(results, dict):
             results = [results]
@@ -410,6 +420,64 @@ class IntacctClient:
                 raise FatalAPIError(f"Error while fetching records: {e.__repr__()}")
         
         return total_intacct_objects
+
+    def read_by_query(self, intacct_object: str, field_list: list, query_filter: str):
+        data = {
+            "readByQuery": {
+                "object": intacct_object,
+                "fields": field_list,
+                "query": query_filter,
+                "pagesize": 1000,
+            }
+        }
+        result_objects = []
+        result_id = ""
+
+        while True:
+            if result_id:
+                data = {"readMore": {"resultId": result_id} }
+            
+            response = self.request_api(data)
+            intacct_objects = response.get("data", {}).get(intacct_object.lower(), [])
+
+            # When only 1 object is found, Intacct returns a dict, otherwise it returns a list of dicts.
+            if isinstance(intacct_objects, dict):
+                intacct_objects = [intacct_objects]
+
+            result_objects.extend(intacct_objects)
+            result_id = response.get("data", {}).get("@resultId", "")
+
+            remaining_objects = int(response.get("data", {}).get("@numremaining", 0))
+            if not result_id or remaining_objects == 0:
+                break
+
+        return result_objects
+
+    def get_existing_vendor_credit_lines(self, vendor_credit_recordnos: list) -> dict:
+        """
+            Given a list of vendor credit recordnos, return a dictionary of vendor credit recordno as key and a list of vendor credit lines as value.
+            The vendor credit lines are grouped by RECORDKEY, which equals to the vendor credit RECORDNO.
+            The vendor credit lines are returned as a list of dictionaries, each dictionary contains the following fields:
+            - RECORDKEY: the vendor credit RECORDNO
+            - LINE_NO: the line number
+            - ITEMDIMKEY: the item dimension key
+            - ACCOUNTNO: the account number
+            - ENTRYDESCRIPTION: the entry description
+        """
+
+        if len(vendor_credit_recordnos) == 0:
+            return {}
+
+        # RECORDKEY equals to the vendor credit RECORDNO
+        vc_lines_filter = f"RECORDKEY in ({','.join(vendor_credit_recordnos)})"
+        exiting_lines = self.read_by_query("APADJUSTMENTITEM", ["RECORDKEY,LINE_NO,ITEMID,ACCOUNTNO,ENTRYDESCRIPTION"], vc_lines_filter)
+
+        # group by RECORDKEY
+        grouped_vc_lines = defaultdict(list)
+        for line in exiting_lines:
+            grouped_vc_lines[line["RECORDKEY"]].append(line)
+
+        return grouped_vc_lines
 
     def get_attachment_folders(self, folder_ids): 
         pagesize = 1000

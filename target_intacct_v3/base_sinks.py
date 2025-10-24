@@ -75,11 +75,24 @@ class IntacctBatchSink(HotglueBatchSink):
             records_by_location[record['locationId']].append(record)
 
         for location_id, location_records in records_by_location.items():
+            state_updates = []
             self.intacct_client.current_location_id = location_id
-            response = self.make_batch_request(location_records)
-            # Handle the batch response 
-            result = self.handle_batch_response(response, location_records)
-            state_updates = result.get("state_updates", [])
+
+            try:
+                response = self.make_batch_request(location_records)
+                # Handle the batch response 
+                result = self.handle_batch_response(response, location_records)
+                state_updates = result.get("state_updates", [])
+            except Exception as e:
+                self.logger.error(f"Failed to make batch request: {e.__repr__()}")
+                for record in location_records:
+                    state = {"success": False, "error": str(e)}
+                    
+                    external_id = record.get("externalId")
+                    if external_id:
+                        state["externalId"] = external_id
+                    
+                    state_updates.append(state)
 
             # Update the latest state for each state update in the response
             for state_update in state_updates:
@@ -101,13 +114,23 @@ class IntacctBatchSink(HotglueBatchSink):
             record_payload = next((record for record in records if record.get("controlId") == ri.get("controlid")), {})
 
             if ri.get("status") == "success":
+                operation = record_payload.get("operation", "")
+                # if operations starts with create_ or update_ it's legacy behavior
+                if operation.startswith("create_"):
+                    record_id = ri.get("key")
+                elif operation.startswith("update_"):
+                    record_id = record_payload.get("recordId")
+                else:
+                    record_id = ri["data"][self.record_type.lower()]["RECORDNO"]
+
                 state = {
-                    "id": ri["data"][self.record_type.lower()]["RECORDNO"],
+                    "id": record_id,
                     "externalId": record_payload.get("externalId"),
                     "success": True,
                 }
 
-                if record_payload.get("operation") == "update":
+                
+                if "update" in operation:
                     state["is_updated"] = True
                 
                 state_updates.append(state)
