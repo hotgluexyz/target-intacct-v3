@@ -212,3 +212,14 @@ class BaseMapper:
                 "customfields": { "customfield": custom_fields_payload }
             }
         return {}
+
+    def _map_custom_fields(self):
+        custom_fields = self.record.get("customFields", [])
+        custom_fields_payload = {}
+
+        if custom_fields:
+            for custom_field in custom_fields:
+                if custom_field.get("name") and custom_field.get("value") is not None:
+                    custom_fields_payload[custom_field.get("name")] = custom_field.get("value")
+
+        return custom_fields_payload
