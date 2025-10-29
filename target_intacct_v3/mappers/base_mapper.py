@@ -197,7 +197,7 @@ class BaseMapper:
         found_entity = self._find_entity(entity_name, record_no_field, record_id_field, record_name_field, subsidiary_id, required, required_if_present)
         return {target_field_name: found_entity["ENTITYID"]} if found_entity else {}
 
-    def _map_custom_fields(self):
+    def _map_custom_fields_legacy(self):
         custom_fields = self.record.get("customFields", [])
         custom_fields_payload = []
 
