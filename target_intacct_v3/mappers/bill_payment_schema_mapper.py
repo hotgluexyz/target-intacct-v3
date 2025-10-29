@@ -20,8 +20,8 @@ class BillPaymentSchemaMapper(BaseMapper):
         if not self.record.get("paymentDate"):
             self.record["paymentDate"] = datetime.datetime.now(datetime.timezone.utc)
         
-        bill = self._find_entity("Bills", record_no_field="billId", record_id_field="billNumber", subsidiary_id=self.subsidiary_id)
-        vendor = self._find_entity("Vendors", record_no_field="vendorId", record_id_field="vendorNumber", record_name_field="vendorName", subsidiary_id=self.subsidiary_id, required=False)
+        bill = self._find_entity("Bills", record_no_field="billId", record_id_field="billNumber", subsidiary_number=self.subsidiary_number)
+        vendor = self._find_entity("Vendors", record_no_field="vendorId", record_id_field="vendorNumber", record_name_field="vendorName", subsidiary_number=self.subsidiary_number, required=False)
         
         if vendor:
             vendor_id = vendor["ENTITYID"]
@@ -46,13 +46,13 @@ class BillPaymentSchemaMapper(BaseMapper):
         if not self.record.get("accountId") and not self.record.get("accountName"):
             raise InvalidInputError(f"accountId/accountName is required for bill payment")
 
-        found_account  = self._find_entity("CheckingAccounts", record_no_field="accountId", record_id_field="accountName", subsidiary_id=self.subsidiary_id, required=False, required_if_present=False)
+        found_account  = self._find_entity("CheckingAccounts", record_no_field="accountId", record_id_field="accountName", subsidiary_number=self.subsidiary_number, required=False, required_if_present=False)
 
         if not found_account:
-            found_account = self._find_entity("SavingsAccounts", record_no_field="accountId", record_id_field="accountName", subsidiary_id=self.subsidiary_id, required=False, required_if_present=False)
+            found_account = self._find_entity("SavingsAccounts", record_no_field="accountId", record_id_field="accountName", subsidiary_number=self.subsidiary_number, required=False, required_if_present=False)
 
         if not found_account:
-            found_account = self._find_entity("CreditCards", record_no_field="accountId", record_id_field="accountName", subsidiary_id=self.subsidiary_id, required=False, required_if_present=False)
+            found_account = self._find_entity("CreditCards", record_no_field="accountId", record_id_field="accountName", subsidiary_number=self.subsidiary_number, required=False, required_if_present=False)
 
         if not found_account:
             raise InvalidInputError(f"Could not find a bank account / credit card in Intacct with accountId={self.record.get('accountId')}/accountName={self.record.get('accountName')}")
