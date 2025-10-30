@@ -12,6 +12,7 @@ class BillSchemaMapper(BaseMapper):
     field_mappings = {
         "externalId": "externalId",
         "billNumber": "RECORDID",
+        "transactionNumber": "DOCNUMBER",
         "description": "DESCRIPTION",
         "currency": ["CURRENCY", "BASECURR"],
         "createdAt": "WHENCREATED",
