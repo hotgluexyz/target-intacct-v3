@@ -12,6 +12,7 @@ class BillSchemaMapper(BaseMapper):
     field_mappings = {
         "externalId": "externalId",
         "billNumber": "RECORDID",
+        "transactionNumber": "DOCNUMBER",
         "description": "DESCRIPTION",
         "currency": ["CURRENCY", "BASECURR"],
         "createdAt": "WHENCREATED",
@@ -27,7 +28,7 @@ class BillSchemaMapper(BaseMapper):
             **self._map_internal_id(),
             **self._map_subsidiary(),
             **self._map_is_draft(),
-            **self._map_sub_record("Vendors", "VENDORID", record_no_field="vendorId", record_id_field="vendorNumber", record_name_field="vendorName", subsidiary_id=self.subsidiary_id),
+            **self._map_sub_record("Vendors", "VENDORID", record_no_field="vendorId", record_id_field="vendorNumber", record_name_field="vendorName", subsidiary_number=self.subsidiary_number),
             **self._map_custom_fields()
         }
      
@@ -43,13 +44,13 @@ class BillSchemaMapper(BaseMapper):
         line_items = self.record.get("lineItems", [])
         if line_items:
             for line in line_items:
-                mapped_line = BillLineItemOrExpenseSchemaMapper(line, "BillLineItem", self.subsidiary_id, vendor_id, self.reference_data).to_intacct()
+                mapped_line = BillLineItemOrExpenseSchemaMapper(line, "BillLineItem", self.subsidiary_number, vendor_id, self.reference_data).to_intacct()
                 mapped_lines.append(mapped_line)
         
         expenses = self.record.get("expenses", [])
         if expenses:
             for expense in expenses:
-                mapped_line = BillLineItemOrExpenseSchemaMapper(expense, "BillLineExpense", self.subsidiary_id, vendor_id, self.reference_data).to_intacct()
+                mapped_line = BillLineItemOrExpenseSchemaMapper(expense, "BillLineExpense", self.subsidiary_number, vendor_id, self.reference_data).to_intacct()
                 mapped_lines.append(mapped_line)
 
         if mapped_lines:

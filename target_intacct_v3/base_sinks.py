@@ -184,16 +184,22 @@ class IntacctBatchPreprocessSingleUpsertSink(HotglueBatchSink):
         success = True
         id = None
         state = {}
+        error_messages = []
         for result in results:
             if result.get("status") != "success":
                 success = False
-                state["error"] = str(result.get("errormessage", result))
-                break
+                error_message = result.get("errormessage")
+                if error_message:
+                    error_messages.append(str(error_message))
+                continue
 
             if result["controlid"] == self.main_control_id:
                 id = result["data"][self.record_type.lower()]["RECORDNO"]
                 if result["function"] == "update":
                     state["is_updated"] = True
+
+        if not success:
+            state["error"] = "\n".join(error_messages) if error_messages else str(results)
 
         return id, success, state
 

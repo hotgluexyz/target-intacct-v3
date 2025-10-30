@@ -8,14 +8,14 @@ class VendorCreditLineItemOrExpenseSchemaMapper(BaseMapper):
             self,
             record,
             sink_name,
-            subsidiary_id,
+            subsidiary_number,
             reference_data,
             existing_lines
     ) -> None:
         self.record = record
         self.sink_name = sink_name
         self.reference_data = reference_data
-        self.subsidiary_id = subsidiary_id
+        self.subsidiary_number = subsidiary_number
         self.existing_lines = existing_lines
         self.is_item_line = sink_name == "VendorCreditLineItem"
 
@@ -28,10 +28,10 @@ class VendorCreditLineItemOrExpenseSchemaMapper(BaseMapper):
         payload = {
             **self._map_sub_record("Accounts", "glaccountno", record_no_field="accountId",
                 record_id_field="accountNumber", record_name_field="accountName",
-                subsidiary_id=self.subsidiary_id),
+                subsidiary_number=self.subsidiary_number),
             **self._map_sub_record("Classes", "classid", record_no_field="classId",
                 record_id_field="classNumber", record_name_field="className",
-                subsidiary_id=self.subsidiary_id, required=False),
+                subsidiary_number=self.subsidiary_number, required=False),
             **self._map_sub_record("Departments", "departmentid", record_no_field="departmentId",
                 record_id_field="departmentNumber", record_name_field="departmentName",
                 required=False),
@@ -78,6 +78,6 @@ class VendorCreditLineItemOrExpenseSchemaMapper(BaseMapper):
     def _map_item(self, payload):
         found_item = self._find_entity("Items", record_no_field="itemId",
                 record_id_field="itemNumber", record_name_field="itemName",
-                subsidiary_id=self.subsidiary_id, required=True)
+                subsidiary_number=self.subsidiary_number, required=True)
 
         payload["itemid"] = found_item["ITEMID"] 

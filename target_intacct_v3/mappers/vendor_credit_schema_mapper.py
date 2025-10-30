@@ -20,7 +20,7 @@ class VendorCreditSchemaMapper(BaseMapper):
         payload = {
             **self._map_internal_id(as_key=True),
             **self._map_subsidiary(),
-            **self._map_sub_record("Vendors", "vendorid", record_no_field="vendorId", record_id_field="vendorNumber", record_name_field="vendorName", subsidiary_id=self.subsidiary_id),
+            **self._map_sub_record("Vendors", "vendorid", record_no_field="vendorId", record_id_field="vendorNumber", record_name_field="vendorName", subsidiary_number=self.subsidiary_number),
             **self._map_date_legacy("issueDate", "datecreated"),
             **self._map_exchange_rate(),
             **self._map_custom_fields_legacy(),
@@ -54,13 +54,13 @@ class VendorCreditSchemaMapper(BaseMapper):
         line_items = self.record.get("lineItems", [])
         if line_items:
             for line in line_items:
-                mapped_line = VendorCreditLineItemOrExpenseSchemaMapper(line, "VendorCreditLineItem", self.subsidiary_id, self.reference_data, existing_lines).to_intacct()
+                mapped_line = VendorCreditLineItemOrExpenseSchemaMapper(line, "VendorCreditLineItem", self.subsidiary_number, self.reference_data, existing_lines).to_intacct()
                 line_operation_key = "updatelineitem" if mapped_line.get("@line_num") else "lineitem"
                 payload[adjustment_items_key][line_operation_key].append(mapped_line)
         
         expenses = self.record.get("expenses", [])
         if expenses:
             for expense in expenses:
-                mapped_line = VendorCreditLineItemOrExpenseSchemaMapper(expense, "VendorCreditLineExpense", self.subsidiary_id, self.reference_data, existing_lines).to_intacct()
+                mapped_line = VendorCreditLineItemOrExpenseSchemaMapper(expense, "VendorCreditLineExpense", self.subsidiary_number, self.reference_data, existing_lines).to_intacct()
                 line_operation_key = "updatelineitem" if mapped_line.get("@line_num") else "lineitem"
                 payload[adjustment_items_key][line_operation_key].append(mapped_line)
