@@ -24,13 +24,13 @@ class BaseMapper:
         self.record = record
         self.sink_name = sink_name
         self.reference_data = reference_data
-        self.subsidiary_id = self._get_subsidiary_id()
+        self.subsidiary_number = self._get_subsidiary_number()
         self.existing_record = self._find_existing_record(self.reference_data.get(self.sink_name, []))
 
     def _find_existing_record(self, reference_list):
         """Finds an existing record in the reference data by matching internal.
         """
-        location_id = self.subsidiary_id
+        location_id = self.subsidiary_number
 
         for existing_record_pk_mapping in self.existing_record_pk_mappings:
             record_id = self.record.get(existing_record_pk_mapping["record_field"])
@@ -60,14 +60,22 @@ class BaseMapper:
 
         return {}
 
-    def _get_subsidiary_id(self):
+    def _get_subsidiary_number(self):
         found_subsidiary = None
 
         subsidiary_id = self.record.get("subsidiaryId")
         if subsidiary_id:
             found_subsidiary = next(
                     (intacct_record for intacct_record in self.reference_data.get("Subsidiaries", [])
-                    if str(intacct_record["LOCATIONID"]) == str(subsidiary_id)),
+                    if str(intacct_record["RECORDNO"]) == str(subsidiary_id)),
+                    None
+                )
+
+        subsidiary_number = self.record.get("subsidiaryNumber")
+        if subsidiary_number:
+            found_subsidiary = next(
+                    (intacct_record for intacct_record in self.reference_data.get("Subsidiaries", [])
+                    if str(intacct_record["LOCATIONID"]) == str(subsidiary_number)),
                     None
                 )
 
@@ -79,14 +87,14 @@ class BaseMapper:
                     None
                 )
 
-        if found_subsidiary is None and (subsidiary_id or subsidiary_name):
-            raise RecordNotFound(f"Subsidiary not found with subsidiaryId='{subsidiary_id}' / subsidiaryName='{subsidiary_name}'.")
+        if found_subsidiary is None and (subsidiary_id or subsidiary_number or subsidiary_name):
+            raise RecordNotFound(f"Subsidiary not found with subsidiaryId='{subsidiary_id}' / subsidiaryNumber='{subsidiary_number}' / subsidiaryName='{subsidiary_name}'.")
 
         return found_subsidiary["LOCATIONID"] if found_subsidiary else "TOP_LEVEL"
 
     def _map_subsidiary(self):
         return {
-            "LOCATIONID": self.subsidiary_id
+            "LOCATIONID": self.subsidiary_number
         }
 
     def _map_fields(self, payload, custom_field_mappings={}):
@@ -140,7 +148,7 @@ class BaseMapper:
         new_dict.update({key: payload[key] for key in payload if key not in order_keys})
         return new_dict
 
-    def _find_entity(self, entity_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True, required_if_present=True):
+    def _find_entity(self, entity_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_number=None, required=True, required_if_present=True):
         found_entity = None
         no_value = self.record.get(record_no_field) if record_no_field else None
         id_value = self.record.get(record_id_field) if record_id_field else None
@@ -154,8 +162,8 @@ class BaseMapper:
         reference_list = self.reference_data.get(entity_name, [])
 
         # if subsidiary is TOP_LEVEL or None we match for all subsidiaries
-        should_match_subsidiary = subsidiary_id not in ["TOP_LEVEL", None]
-        valid_subsidiaries = [subsidiary_id, "TOP_LEVEL"] if subsidiary_id not in ["TOP_LEVEL", None] else ["TOP_LEVEL"]
+        should_match_subsidiary = subsidiary_number not in ["TOP_LEVEL", None]
+        valid_subsidiaries = [subsidiary_number, "TOP_LEVEL"] if subsidiary_number not in ["TOP_LEVEL", None] else ["TOP_LEVEL"]
 
         # iterate over valid subsidiaries because we wanna first look for the entity
         # at the subsidiary level and then at the top level
@@ -193,8 +201,8 @@ class BaseMapper:
         
         return {}
 
-    def _map_sub_record(self, entity_name, target_field_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_id=None, required=True, required_if_present=True):
-        found_entity = self._find_entity(entity_name, record_no_field, record_id_field, record_name_field, subsidiary_id, required, required_if_present)
+    def _map_sub_record(self, entity_name, target_field_name, record_no_field=None, record_id_field=None, record_name_field=None, subsidiary_number=None, required=True, required_if_present=True):
+        found_entity = self._find_entity(entity_name, record_no_field, record_id_field, record_name_field, subsidiary_number, required, required_if_present)
         return {target_field_name: found_entity["ENTITYID"]} if found_entity else {}
 
     def _map_custom_fields(self):
