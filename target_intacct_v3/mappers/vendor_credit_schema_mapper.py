@@ -23,7 +23,7 @@ class VendorCreditSchemaMapper(BaseMapper):
             **self._map_sub_record("Vendors", "vendorid", record_no_field="vendorId", record_id_field="vendorNumber", record_name_field="vendorName", subsidiary_number=self.subsidiary_number),
             **self._map_date_legacy("issueDate", "datecreated"),
             **self._map_exchange_rate(),
-            **self._map_custom_fields(),
+            **self._map_custom_fields_legacy(),
             **self._map_is_draft(key_name="action")
         }
 

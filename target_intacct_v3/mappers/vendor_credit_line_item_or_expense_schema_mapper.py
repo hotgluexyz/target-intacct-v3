@@ -38,7 +38,7 @@ class VendorCreditLineItemOrExpenseSchemaMapper(BaseMapper):
             **self._map_sub_record("Locations", "locationid", record_no_field="locationId",
                 record_id_field="locationNumber", record_name_field="locationName",
                 required=False),
-            **self._map_custom_fields()
+            **self._map_custom_fields_legacy()
         }
         
         if self.is_item_line:

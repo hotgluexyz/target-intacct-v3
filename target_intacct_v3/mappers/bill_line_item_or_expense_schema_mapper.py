@@ -46,7 +46,8 @@ class BillLineItemOrExpenseSchemaMapper(BaseMapper):
             **self._map_sub_record("Tasks", "TASKID", record_id_field="taskNumber",
                 required=False),
             **self._map_sub_record("Employees", "EMPLOYEEID", record_id_field="employeeId",
-                subsidiary_number=self.subsidiary_number, required=False)
+                subsidiary_number=self.subsidiary_number, required=False),
+            **self._map_custom_fields()
         }
 
         # fallback to header vendor if vendor not supplied at line level

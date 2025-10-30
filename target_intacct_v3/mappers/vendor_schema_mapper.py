@@ -20,7 +20,8 @@ class VendorSchemaMapper(BaseMapper):
             **self._map_internal_id(),
             **self._map_subsidiary(),
             **self._map_contact_info(),
-            **self._map_is_active()
+            **self._map_is_active(),
+            **self._map_custom_fields()
         }
 
         
