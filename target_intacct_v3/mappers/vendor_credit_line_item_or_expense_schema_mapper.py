@@ -45,6 +45,10 @@ class VendorCreditLineItemOrExpenseSchemaMapper(BaseMapper):
             self._map_item(payload)
 
         self._map_fields(payload)
+
+        if payload.get("amount"):
+            payload["amount"] = payload["amount"] * -1
+
         # in case it's an update, we need to map the line number
         self._map_line_number(payload)
 
