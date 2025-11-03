@@ -48,7 +48,7 @@ class AttachmentSchemaMapper:
             existing_attachments = [existing_attachments]
 
         for existing_attachment in existing_attachments:
-            if existing_attachment.get("attachmentname") == name:
+            if existing_attachment.get("attachmentname") == attachment_name and existing_attachment.get("attachmenttype") == attachment_type:
                 self.logger.info(f"Attachment {name} already exists. Skipping creation.")
                 return None
 
