@@ -14,10 +14,12 @@ class AttachmentSchemaMapper:
         if not name:
             raise InvalidInputError(f"Attachment 'name' is required.")
 
-        try:
-            attachment_type = name.split(".")[-1]
-        except:
-            attachment_type = "pdf"
+        name_splitted = name.split(".")
+        if len(name_splitted) == 1:
+            raise InvalidInputError(f"Attachment '{name}' must contain a file extension.")
+        
+        attachment_name = ".".join(name_splitted[:-1])
+        attachment_type = name_splitted[-1]
 
         attachment_data = None
 
@@ -55,7 +57,7 @@ class AttachmentSchemaMapper:
                 return None
 
         return {
-            "attachmentname": name,
+            "attachmentname": attachment_name,
             "attachmenttype": attachment_type,
             "attachmentdata": attachment_data
         }
