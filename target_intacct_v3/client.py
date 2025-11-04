@@ -308,7 +308,9 @@ class IntacctSink(HotglueSink):
 
     def get_locations(self):
         if IntacctSink.locations is None:
-            locations = self.get_records("LOCATION", ["LOCATIONID", "NAME"])
+            locations = self.get_records("LOCATION", ["LOCATIONID", "NAME", "STATUS"])
+            # filter out locations with status "Inactive", not doing on the request because status filtering is not working for some reason
+            locations = [location for location in locations if location.get("STATUS").lower() == "active"]
             IntacctSink.locations = dictify(locations, "NAME", "LOCATIONID")
         return IntacctSink.locations
 

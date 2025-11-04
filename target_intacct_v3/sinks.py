@@ -634,11 +634,10 @@ class PurchaseInvoices(IntacctSink):
                     location_name = line.get("location")
                     if location_name and not item["LOCATIONID"]:
                         self.get_locations()
-                        try:
-                            item["LOCATIONID"] = IntacctSink.locations.get(location_name)
-                        except:
+                        item["LOCATIONID"] = IntacctSink.locations.get(location_name)
+                        if not item["LOCATIONID"]:
                             return {
-                                "error": f"Location '{location_name}' does not exist. Did you mean any of these: {list(self.locations.keys())}?"
+                                "error": f"Location '{location_name}' does not exist or is inactive. Did you mean any of these: {list(self.locations.keys())}?"
                             }
                     if not item["LOCATIONID"] and payload["LOCATIONID"]:
                         item["LOCATIONID"] = payload["LOCATIONID"]
