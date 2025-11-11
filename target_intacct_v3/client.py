@@ -322,16 +322,18 @@ class IntacctClient:
             raise FatalAPIError(f"Failed to parse response: {e.__repr__()}")
     
     def clean_creds(self, request_body: dict):
-        sensitive_fields = [
+        sensitive_config_fields = [
             "sender_id",
             "sender_password",
             "user_password",
             "user_id"
         ]
 
-        for field in sensitive_fields:
+        for field in sensitive_config_fields:
             if self.config.get(field) in str(request_body):
                 request_body = str(request_body).replace(self.config.get(field), "REDACTED")
+        # clean session id
+        request_body = str(request_body).replace(self.session_id, "REDACTED")
 
         return request_body
 
