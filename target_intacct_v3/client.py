@@ -320,6 +320,22 @@ class IntacctClient:
 
         except (KeyError, ValueError, TypeError) as e:
             raise FatalAPIError(f"Failed to parse response: {e.__repr__()}")
+    
+    def clean_creds(self, request_body: dict):
+        sensitive_config_fields = [
+            "sender_id",
+            "sender_password",
+            "user_password",
+            "user_id"
+        ]
+
+        for field in sensitive_config_fields:
+            if self.config.get(field) in str(request_body):
+                request_body = str(request_body).replace(self.config.get(field), "REDACTED")
+        # clean session id
+        request_body = str(request_body).replace(self.session_id, "REDACTED")
+
+        return request_body
 
     @backoff.on_exception(
         backoff.expo,
@@ -336,7 +352,8 @@ class IntacctClient:
         url = self.base_url
 
         if "attachmentdata" not in str(request_data):
-            self.logger.info(f"Making request to {url} with payload: {request_data}")
+            request_data_log = self.clean_creds(request_data)
+            self.logger.info(f"Making request to {url} with payload: {request_data_log}")
 
         try:
             response = requests.request(
