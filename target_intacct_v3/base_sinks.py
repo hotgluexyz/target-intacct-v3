@@ -96,7 +96,8 @@ class IntacctBatchSink(HotglueBatchSink):
 
             # Update the latest state for each state update in the response
             for state_update in state_updates:
-                self.update_state(state_update)
+                mapped_record = next((record for record in location_records if record.get("externalId") == state_update.get("externalId")), {})
+                self.update_state(state_update, record=mapped_record)
 
     def make_batch_request(self, records: List[Dict]):
         records_payload = []
@@ -260,7 +261,7 @@ class IntacctBatchPreprocessSingleUpsertSink(HotglueBatchSink):
                 if external_id:
                     state["externalId"] = external_id
 
-                self.update_state(state)
+                self.update_state(state, record=record)
 
     def make_batch_request(self, records: List[dict]):
         pass
