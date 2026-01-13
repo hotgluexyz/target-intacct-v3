@@ -43,6 +43,9 @@ class Suppliers(IntacctSink):
                 },
             }
 
+            if record.get("id"):
+                payload["RECORDNO"] = record["id"]
+
             # check for duplicates
             vendor_id = payload.get(
                 "VENDORID"
@@ -77,8 +80,12 @@ class Suppliers(IntacctSink):
         if record.get("error"):
             raise Exception(record["error"])
         if record:
-            response = self.request_api("POST", request_data={"create": record})
-            id = response["data"]["vendor"]["VENDORID"]
+            if record.get("RECORDNO"):
+                action = "update"
+            else:
+                action = "create"
+            response = self.request_api("POST", request_data={action: record})
+            id = response["data"]["vendor"]["RECORDNO"]
             return id, True, state_updates
 
 
