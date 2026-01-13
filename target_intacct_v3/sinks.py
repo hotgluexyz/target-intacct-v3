@@ -46,29 +46,30 @@ class Suppliers(IntacctSink):
             if record.get("id"):
                 payload["RECORDNO"] = record["id"]
 
-            # check for duplicates
-            vendor_id = payload.get(
-                "VENDORID"
-            )  # VENDORID is required if company does not use document sequencing
-            if vendor_id and re.match("^[A-Za-z0-9- ]*$", vendor_id):
-                if len(vendor_id) > 20:
-                    self.logger.info(f"Truncating VENDORID due to size limit (>20 characters): {vendor_id}")
-                payload["VENDORID"] = vendor_id[
-                    :20
-                ]  # Intact size limit on VENDORID (20 characters)
-
-                if (payload["VENDORID"] in IntacctSink.vendors.items()):
-                    return {
-                            "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} due a vendor with same VENDORID exists."
-                        }
-                if (payload["NAME"] in IntacctSink.vendors.keys()):
-                    return {
-                        "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} due a vendor with same NAME exists."
-                    }
             else:
-                return {
-                    "error": f"Skipping vendor due VENDORID is either missing or has unsupported chars. chars. Only letters, numbers and dashes accepted."
-                }
+                # check for duplicates
+                vendor_id = payload.get(
+                    "VENDORID"
+                )  # VENDORID is required if company does not use document sequencing
+                if vendor_id and re.match("^[A-Za-z0-9- ]*$", vendor_id):
+                    if len(vendor_id) > 20:
+                        self.logger.info(f"Truncating VENDORID due to size limit (>20 characters): {vendor_id}")
+                    payload["VENDORID"] = vendor_id[
+                        :20
+                    ]  # Intact size limit on VENDORID (20 characters)
+
+                    if (payload["VENDORID"] in IntacctSink.vendors.items()):
+                        return {
+                                "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} due a vendor with same VENDORID exists."
+                            }
+                    if (payload["NAME"] in IntacctSink.vendors.keys()):
+                        return {
+                            "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} due a vendor with same NAME exists."
+                        }
+                else:
+                    return {
+                        "error": f"Skipping vendor due VENDORID is either missing or has unsupported chars. chars. Only letters, numbers and dashes accepted."
+                    }
 
             return {"VENDOR": payload}
         except Exception as e:
@@ -80,8 +81,9 @@ class Suppliers(IntacctSink):
         if record.get("error"):
             raise Exception(record["error"])
         if record:
-            if record.get("RECORDNO"):
+            if record.get("VENDOR", {}).get("RECORDNO"):
                 action = "update"
+                state_updates["is_updated"] = True
             else:
                 action = "create"
             response = self.request_api("POST", request_data={action: record})
