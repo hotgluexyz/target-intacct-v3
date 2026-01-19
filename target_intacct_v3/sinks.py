@@ -78,7 +78,7 @@ class Suppliers(IntacctSink):
             raise Exception(record["error"])
         if record:
             response = self.request_api("POST", request_data={"create": record})
-            id = response["data"]["vendor"]["VENDORID"]
+            id = response["data"]["vendor"]["RECORDNO"]
 
             state_updates = self.get_record_url("VENDOR", id, state_updates)
             return id, True, state_updates
