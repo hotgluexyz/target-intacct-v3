@@ -88,6 +88,7 @@ class Suppliers(IntacctSink):
                 action = "create"
             response = self.request_api("POST", request_data={action: record})
             id = response["data"]["vendor"]["RECORDNO"]
+            state_updates = self.get_record_url("VENDOR", id, state_updates)
             return id, True, state_updates
 
 
@@ -218,6 +219,8 @@ class APAdjustments(IntacctSink):
                 "POST", request_data={"create_apadjustment": record}
             )
             id = response["key"]
+
+            state_updates = self.get_record_url("APADJUSTMENT", id, state_updates)
             return id, True, state_updates
 
 
@@ -309,6 +312,8 @@ class JournalEntries(IntacctSink):
         if record:
             response = self.request_api("POST", request_data={"create": record})
             id = response["data"]["glbatch"]["RECORDNO"]
+
+            state_updates = self.get_record_url("GLBATCH", id, state_updates)
             return id, True, state_updates
 
 
@@ -346,20 +351,21 @@ class Bills(IntacctSink):
                     )
 
             # check if bill exists
-            existing_bill = self.get_records(
-                "APBILL",
-                fields=["RECORDNO"],
-                filter={
-                    "filter": {
-                        "equalto": {
-                            "field": "RECORDID",
-                            "value": payload.get("RECORDID"),
+            if payload.get("RECORDID"):
+                existing_bill = self.get_records(
+                    "APBILL",
+                    fields=["RECORDNO"],
+                    filter={
+                        "filter": {
+                            "equalto": {
+                                "field": "RECORDID",
+                                "value": payload.get("RECORDID"),
+                            }
                         }
-                    }
-                },
-            )
-            if existing_bill:
-                payload["RECORDNO"] = existing_bill[0].get("RECORDNO")
+                    },
+                )
+                if existing_bill:
+                    payload["RECORDNO"] = existing_bill[0].get("RECORDNO")
 
             # include locationid at header level
             locationname = record.get("location")
@@ -423,8 +429,11 @@ class Bills(IntacctSink):
                         )
 
                 self.get_accounts()
+                account_id = line.get("accountId")
                 account_name = line.get("accountName")
-                if (
+                if account_id:
+                    item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
+                elif (
                     account_name
                     and item.get("ACCOUNTNO") not in IntacctSink.accounts.keys()
                 ):
@@ -443,6 +452,10 @@ class Bills(IntacctSink):
                         department
                     ) or IntacctSink.departments.get(department_name)
                 payload["APBILLITEMS"]["APBILLITEM"].append(item)
+
+                # get employee id
+                if line.get("employeeId"):
+                    item["EMPLOYEEID"] = self.get_employee_id_by_recordno(line["employeeId"])
 
             # send payload and attachments
             payload = clean_convert(payload)
@@ -482,6 +495,8 @@ class Bills(IntacctSink):
             action = "update" if payload["APBILL"].get("RECORDNO") else "create"
             response = self.request_api("POST", request_data={action: payload})
             bill_id = response["data"]["apbill"]["RECORDNO"]
+
+            state_updates = self.get_record_url("APBILL", bill_id, state_updates)
 
             self.logger.info(f"Successfully {action}d bill with RECORDNO {bill_id}")
             return bill_id, True, state_updates
@@ -621,7 +636,10 @@ class PurchaseInvoices(IntacctSink):
 
                     self.get_accounts()
                     account_name = line.get("accountName")
-                    if (
+                    account_id = line.get("accountId")
+                    if account_id:
+                        item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
+                    elif (
                         account_name
                         and item.get("ACCOUNTNO") not in IntacctSink.accounts.keys()
                     ):
@@ -671,6 +689,10 @@ class PurchaseInvoices(IntacctSink):
                     
                     bill_items.append(item)
 
+                    # get employee id
+                    if line.get("employeeId"):
+                        item["EMPLOYEEID"] = self.get_employee_id_by_recordno(line["employeeId"])
+
                 payload["APBILLITEMS"] = { "APBILLITEM": bill_items }
 
             # send payload and attachments
@@ -716,6 +738,8 @@ class PurchaseInvoices(IntacctSink):
             action = "update" if payload["APBILL"].get("RECORDNO") else "create"
             response = self.request_api("POST", request_data={action: payload})
             bill_id = response["data"]["apbill"]["RECORDNO"]
+
+            state_updates = self.get_record_url("APBILL", bill_id, state_updates)
 
             # Step 3: Log success and return the bill ID, success status, and state updates
             self.logger.info(f"Successfully {action}d bill with RECORDNO {bill_id}")
@@ -804,6 +828,8 @@ class BillPayment(IntacctSink):
         if record:
             response = self.request_api("POST", request_data={"create": record})
             id = response["data"]["appymt"]["RECORDNO"]
+
+            state_updates = self.get_record_url("APPYMT", id, state_updates)
             return id, True, state_updates
 
 class PurchaseOrders(IntacctSink):
@@ -1004,6 +1030,8 @@ class PurchaseOrders(IntacctSink):
             po_id = order[0]["RECORDNO"]
             if action == "update_potransaction":
                 state_updates["is_updated"] = True
+
+            state_updates = self.get_record_url("PODOCUMENT", po_id, state_updates)
 
             # Step 3: Log success and return the PO ID, success status, and state updates
             self.logger.info(f"Successfully {action}d Purchase Order with id {po_id}")

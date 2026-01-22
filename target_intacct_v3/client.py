@@ -460,3 +460,27 @@ class IntacctSink(HotglueSink):
 
         self.logger.info(f"No new attachments to post for record {record_id}.")
         return
+
+    def get_employee_id_by_recordno(self, recordno):
+        employee = self.request_api("POST", request_data={"query": {"object": "EMPLOYEE", "select": {"field": ["EMPLOYEEID", "RECORDNO"]}, "filter": {"equalto": {"field": "RECORDNO", "value": f"{recordno}"}}}})
+        if employee:
+            return employee.get("data", {}).get("EMPLOYEE", {}).get("EMPLOYEEID")
+        raise Exception(f"Employee with recordno {recordno} not found.")
+
+    def get_account_no_by_account_id(self, account_id):
+        account = self.request_api("POST", request_data={"query": {"object": "GLACCOUNT", "select": {"field": ["ACCOUNTNO", "RECORDNO"]}, "filter": {"equalto": {"field": "RECORDNO", "value": f"{account_id}"}}}})
+        if account:
+            return account.get("data", {}).get("GLACCOUNT", {}).get("ACCOUNTNO")
+        raise Exception(f"Account with account_id {account_id} not found.")
+    
+
+    def get_record_url(self, object, record_id, state_updates):
+        try:
+            if self.config.get("output_record_url"):
+                record_url = self.request_api("POST", request_data={"query": {"object": object, "select": {"field": ["RECORD_URL"]}, "filter": {"equalto": {"field": "RECORDNO", "value": f"{record_id}"}}}})
+                if record_url:
+                    record_url = record_url.get("data", {}).get(object, {}).get("RECORD_URL")
+                    state_updates["record_url"] = record_url
+        except Exception as e:
+            self.logger.error(f"Failed to get record url for {object} with record_id {record_id}: {str(e)}")
+        return state_updates
