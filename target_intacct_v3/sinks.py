@@ -340,44 +340,6 @@ class Bills(IntacctSink):
                 "LOCATIONID": record.get("locationId"),
             }
 
-            # validate RECORDID
-            if payload.get("RECORDID"):
-                invalid_chars = r"[\"\'&<>#?]"  # characters not allowed for RECORDID [&, <, >, #, ?]
-                is_id_valid = not bool(re.search(invalid_chars, (payload.get("RECORDID"))))
-
-                if not is_id_valid:
-                    raise Exception(
-                        f"RECORDID '{payload.get('RECORDID')}' contains one or more invalid characters '&,<,>,#,?'. Please provide a RECORDID that does not include these characters."
-                    )
-
-            # check if bill exists
-            if payload.get("RECORDID"):
-                existing_bill = self.get_records(
-                    "APBILL",
-                    fields=["RECORDNO"],
-                    filter={
-                        "filter": {
-                            "equalto": {
-                                "field": "RECORDID",
-                                "value": payload.get("RECORDID"),
-                            }
-                        }
-                    },
-                )
-                if existing_bill:
-                    payload["RECORDNO"] = existing_bill[0].get("RECORDNO")
-
-            # include locationid at header level
-            locationname = record.get("location")
-            if locationname and not payload.get("LOCATIONID"):
-                self.get_locations()
-                try:
-                    payload["LOCATIONID"] = IntacctSink.locations[locationname]
-                except:
-                    return {
-                        "error": f"ERROR: Location '{locationname}' does not exist. Did you mean any of these: {list(IntacctSink.locations.keys())}?"
-                    }
-
             # look for vendorName, vendorNumber and vendorId
             vendorname = record.get("vendorName")
             if vendorname and not payload.get("VENDORID"):
@@ -397,6 +359,58 @@ class Bills(IntacctSink):
                 else:
                     return {
                         "error": f"ERROR: VENDORID {vendor_number} not found for this account."
+                    }
+
+            # VENDORID is required for non-draft bills
+            if payload.get("ACTION") != "Draft" and not payload.get("VENDORID"):
+                return {
+                    "error": f"Vendor data couldn't be found by vendorName: {vendorname} or vendorNumber: {vendor_number}. VendorID is required for non-draft bills."
+                }
+
+            # validate RECORDID
+            if payload.get("RECORDID"):
+                invalid_chars = r"[\"\'&<>#?]"  # characters not allowed for RECORDID [&, <, >, #, ?]
+                is_id_valid = not bool(re.search(invalid_chars, (payload.get("RECORDID"))))
+
+                if not is_id_valid:
+                    raise Exception(
+                        f"RECORDID '{payload.get('RECORDID')}' contains one or more invalid characters '&,<,>,#,?'. Please provide a RECORDID that does not include these characters."
+                    )
+
+            # check if bill exists matching RECORDID and VENDORID
+            if payload.get("RECORDID"):
+                existing_bill = self.get_records(
+                    "APBILL",
+                    fields=["RECORDNO"],
+                    filter={
+                        "filter": {
+                            "and": {
+                                "equalto": [
+                                    {
+                                        "field": "RECORDID",
+                                        "value": payload.get("RECORDID"),
+                                    },
+                                    {
+                                        "field": "VENDORID",
+                                        "value": payload.get("VENDORID", ""),
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                )
+                if existing_bill:
+                    payload["RECORDNO"] = existing_bill[0].get("RECORDNO")
+
+            # include locationid at header level
+            locationname = record.get("location")
+            if locationname and not payload.get("LOCATIONID"):
+                self.get_locations()
+                try:
+                    payload["LOCATIONID"] = IntacctSink.locations[locationname]
+                except:
+                    return {
+                        "error": f"ERROR: Location '{locationname}' does not exist. Did you mean any of these: {list(IntacctSink.locations.keys())}?"
                     }
 
             lines = parse_objs(record.get("lineItems", "[]"))
@@ -540,6 +554,32 @@ class PurchaseInvoices(IntacctSink):
                 "DESCRIPTION": record.get("description"),
             }
 
+            # look for vendorName, vendorNumber and vendorId
+            vendorname = record.get("supplierName")
+            if vendorname and not payload.get("VENDORID"):
+                self.get_vendors()
+                try:
+                    payload["VENDORID"] = IntacctSink.vendors[vendorname]
+                except:
+                    return {
+                        "error": f"ERROR: Vendor {vendorname} does not exist. Did you mean any of these: {list(IntacctSink.vendors.keys())}?"
+                    }
+
+            vendor_number = record.get("vendorNum")
+            if not payload.get("VENDORID") and vendor_number:
+                self.get_vendors()
+                if vendor_number in IntacctSink.vendors.values():
+                    payload["VENDORID"] = vendor_number
+                else:
+                    return {
+                        "error": f"ERROR: VENDORID {vendor_number} not found for this account."
+                    }
+            
+            if payload.get("ACTION") != "Draft" and not payload.get("VENDORID"):
+                return {
+                    "error":f"Vendor data couldn't be found by vendorName: {vendorname} or vendorNumber: {vendor_number}. VendorID is required for non-draft bills."
+                }
+
             if payload.get("RECORDID"):
                 # validate RECORDID
                 invalid_chars = r"[\"\'&<>#?]"  # characters not allowed for RECORDID [&, <, >, #, ?]
@@ -550,15 +590,23 @@ class PurchaseInvoices(IntacctSink):
                         f"RECORDID '{payload.get('RECORDID')}' contains one or more invalid characters '&,<,>,#,?'. Please provide a RECORDID that does not include these characters."
                     )
 
-            # check if bill exists
+            # check if bill exists matching RECORDID and VENDORID
             existing_bill = self.get_records(
                 "APBILL",
                 fields=["RECORDNO", "STATE"],
                 filter={
                     "filter": {
-                        "equalto": {
-                            "field": "RECORDID",
-                            "value": payload.get("RECORDID"),
+                        "and": {
+                            "equalto": [
+                                {
+                                    "field": "RECORDID",
+                                    "value": payload.get("RECORDID"),
+                                },
+                                {
+                                    "field": "VENDORID",
+                                    "value": payload.get("VENDORID", ""),
+                                }
+                            ]
                         }
                     }
                 },
@@ -580,27 +628,6 @@ class PurchaseInvoices(IntacctSink):
                 except:
                     return {
                         "error": f"ERROR: Location '{locationname}' does not exist. Did you mean any of these: {list(IntacctSink.locations.keys())}?"
-                    }
-
-            # look for vendorName, vendorNumber and vendorId
-            vendorname = record.get("supplierName")
-            if vendorname and not payload.get("VENDORID"):
-                self.get_vendors()
-                try:
-                    payload["VENDORID"] = IntacctSink.vendors[vendorname]
-                except:
-                    return {
-                        "error": f"ERROR: Vendor {vendorname} does not exist. Did you mean any of these: {list(IntacctSink.vendors.keys())}?"
-                    }
-
-            vendor_number = record.get("vendorNum")
-            if not payload.get("VENDORID") and vendor_number:
-                self.get_vendors()
-                if vendor_number in IntacctSink.vendors.values():
-                    payload["VENDORID"] = vendor_number
-                else:
-                    return {
-                        "error": f"ERROR: VENDORID {vendor_number} not found for this account."
                     }
                     
             if bill_state == "Paid":
