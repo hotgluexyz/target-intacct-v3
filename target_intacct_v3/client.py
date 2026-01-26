@@ -477,9 +477,9 @@ class IntacctSink(HotglueSink):
     def get_record_url(self, object, record_id, state_updates):
         try:
             if self.config.get("output_record_url"):
-                record_url = self.request_api("POST", request_data={"query": {"object": object, "select": {"field": ["RECORD_URL"]}, "filter": {"equalto": {"field": "RECORDNO", "value": f"{record_id}"}}}})
+                record_url = self.request_api("POST", request_data={"readByQuery": {"object": object, "fields": "RECORD_URL", "query": f"RECORDNO = {record_id}"}})
                 if record_url:
-                    record_url = record_url.get("data", {}).get(object, {}).get("RECORD_URL")
+                    record_url = record_url.get("data", {}).get(object.lower(), {}).get("RECORD_URL")
                     state_updates["record_url"] = record_url
         except Exception as e:
             self.logger.error(f"Failed to get record url for {object} with record_id {record_id}: {str(e)}")
