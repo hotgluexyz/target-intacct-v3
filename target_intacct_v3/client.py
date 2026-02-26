@@ -290,8 +290,9 @@ class IntacctSink(HotglueSink):
 
     def get_vendors(self):
         if IntacctSink.vendors is None:
-            vendors = self.get_records("VENDOR", ["VENDORID", "NAME"])
+            vendors = self.get_records("VENDOR", ["VENDORID", "NAME", "RECORDNO"])
             IntacctSink.vendors = dictify(vendors, "NAME", "VENDORID")
+            IntacctSink.vendors_recordno = dictify(vendors, "RECORDNO", "VENDORID")
         return IntacctSink.vendors
 
     def get_accounts(self):
