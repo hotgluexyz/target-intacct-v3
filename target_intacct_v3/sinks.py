@@ -626,6 +626,22 @@ class PurchaseInvoices(IntacctSink):
                 if existing_bill:
                     payload["RECORDNO"] = existing_bill[0].get("RECORDNO")
                     bill_state = existing_bill[0].get("STATE")
+            else:
+                existing_bill = self.get_records(
+                    "APBILL",
+                    fields=["RECORDNO", "STATE"],
+                    filter={
+                        "filter": {
+                            "equalto": {"field": "RECORDNO", "value": payload.get("RECORDNO")}
+                        }
+                    },
+                )
+
+                if not existing_bill:
+                    return {    
+                        "error": f"ERROR: Purchase invoice with RECORDNO '{payload.get('RECORDNO')}' does not exist."
+                    }
+                bill_state = existing_bill[0].get("STATE")
 
             # include locationid at header level
             address = parse_objs(record.get("addresses", "[]"))
