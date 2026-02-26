@@ -18,6 +18,7 @@ class IntacctSink(HotglueSink):
     base_url = "https://api.intacct.com/ia/xml/xmlgw.phtml"
     endpoint = ""
     vendors = None
+    vendors_recordno = None
     accounts = None
     locations = None
     projects = None
