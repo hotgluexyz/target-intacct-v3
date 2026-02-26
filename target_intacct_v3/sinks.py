@@ -552,7 +552,18 @@ class PurchaseInvoices(IntacctSink):
                 "LOCATIONID": record.get("locationId"),
                 "DOCNUMBER": record.get("number"),
                 "DESCRIPTION": record.get("description"),
+                "RECORDNO": record.get("id"),
             }
+
+            if record.get("supplierId"):
+                self.get_vendors()
+                supplier_recordno = str(record.get("supplierId"))
+                vendor_id = IntacctSink.vendors_recordno.get(supplier_recordno)
+                if not vendor_id:
+                    return {
+                        "error": f"ERROR: Vendor with RECORDNO '{supplier_recordno}' does not exist."
+                    }
+                payload["VENDORID"] = vendor_id
 
             # look for vendorName, vendorNumber and vendorId
             vendorname = record.get("supplierName")
@@ -590,29 +601,46 @@ class PurchaseInvoices(IntacctSink):
                         f"RECORDID '{payload.get('RECORDID')}' contains one or more invalid characters '&,<,>,#,?'. Please provide a RECORDID that does not include these characters."
                     )
 
-            # check if bill exists matching RECORDID and VENDORID
-            existing_bill = self.get_records(
-                "APBILL",
-                fields=["RECORDNO", "STATE"],
-                filter={
-                    "filter": {
-                        "and": {
-                            "equalto": [
-                                {
-                                    "field": "RECORDID",
-                                    "value": payload.get("RECORDID"),
-                                },
-                                {
-                                    "field": "VENDORID",
-                                    "value": payload.get("VENDORID", ""),
-                                }
-                            ]
+            if not payload.get("RECORDNO"):
+                # check if bill exists matching RECORDID and VENDORID
+                existing_bill = self.get_records(
+                    "APBILL",
+                    fields=["RECORDNO", "STATE"],
+                    filter={
+                        "filter": {
+                            "and": {
+                                "equalto": [
+                                    {
+                                        "field": "RECORDID",
+                                        "value": payload.get("RECORDID"),
+                                    },
+                                    {
+                                        "field": "VENDORID",
+                                        "value": payload.get("VENDORID", ""),
+                                    }
+                                ]
+                            }
                         }
+                    },
+                )
+                if existing_bill:
+                    payload["RECORDNO"] = existing_bill[0].get("RECORDNO")
+                    bill_state = existing_bill[0].get("STATE")
+            else:
+                existing_bill = self.get_records(
+                    "APBILL",
+                    fields=["RECORDNO", "STATE"],
+                    filter={
+                        "filter": {
+                            "equalto": {"field": "RECORDNO", "value": payload.get("RECORDNO")}
+                        }
+                    },
+                )
+
+                if not existing_bill:
+                    return {    
+                        "error": f"ERROR: Purchase invoice with RECORDNO '{payload.get('RECORDNO')}' does not exist."
                     }
-                },
-            )
-            if existing_bill:
-                payload["RECORDNO"] = existing_bill[0].get("RECORDNO")
                 bill_state = existing_bill[0].get("STATE")
 
             # include locationid at header level
@@ -646,6 +674,16 @@ class PurchaseInvoices(IntacctSink):
                         "ACCOUNTNO": line.get("accountNumber"),
                         "VENDORID": line.get("supplierNumber", line.get("supplierCode")),
                     }
+
+                    if line.get("supplierId"):
+                        self.get_vendors()
+                        supplier_recordno = str(line.get("supplierId"))
+                        vendor_id = IntacctSink.vendors_recordno.get(supplier_recordno)
+                        if not vendor_id:
+                            return {
+                                "error": f"ERROR: Vendor with RECORDNO '{supplier_recordno}' does not exist."
+                            }
+                        item["VENDORID"] = vendor_id
 
                     if line.get("supplierName") and not item.get("VENDORID"):
                         self.get_vendors()
