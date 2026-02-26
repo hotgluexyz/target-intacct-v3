@@ -667,7 +667,7 @@ class PurchaseInvoices(IntacctSink):
                             return {
                                 "error": f"ERROR: Vendor with RECORDNO '{supplier_recordno}' does not exist."
                             }
-                        payload["VENDORID"] = vendor_id
+                        item["VENDORID"] = vendor_id
 
                     if line.get("supplierName") and not item.get("VENDORID"):
                         self.get_vendors()
