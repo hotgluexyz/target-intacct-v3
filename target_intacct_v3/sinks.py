@@ -60,15 +60,15 @@ class Suppliers(IntacctSink):
 
                     if (payload["VENDORID"] in IntacctSink.vendors.items()):
                         return {
-                                "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} due a vendor with same VENDORID exists."
+                                "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because a vendor with same VENDORID already exists."
                             }
                     if (payload["NAME"] in IntacctSink.vendors.keys()):
                         return {
-                            "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} due a vendor with same NAME exists."
+                            "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because a vendor with same NAME already exists."
                         }
                 else:
                     return {
-                        "error": f"Skipping vendor due VENDORID is either missing or has unsupported chars. chars. Only letters, numbers and dashes accepted."
+                        "error": f"Skipping vendor because VENDORID is either missing or has unsupported chars. Only letters, numbers and dashes accepted."
                     }
 
             return {"VENDOR": payload}
@@ -495,7 +495,7 @@ class Bills(IntacctSink):
         supdoc_id = None
         if attachments:
             if not record_id:
-                self.logger.error("No RECORDID found in the payload. Skipping sendind attachments as no pk was found to create the folder and/or supdoc.")
+                self.logger.error("No RECORDID found in the payload. Skipping sending attachments as no pk was found to create the folder and/or supdoc.")
             try:
                 supdoc_id = self.post_attachments(attachments, record_id)
                 payload["APBILL"]["SUPDOCID"] = supdoc_id
@@ -696,7 +696,7 @@ class PurchaseInvoices(IntacctSink):
                             item["CLASSID"] = IntacctSink.classes[class_name]
                         except:
                             self.logger.info(
-                                f"Skipping class due Class {class_name} does not exist. Did you mean any of these: {list(IntacctSink.classes.keys())}?"
+                                f"Skipping class because Class {class_name} does not exist. Did you mean any of these: {list(IntacctSink.classes.keys())}?"
                             )
 
                     self.get_accounts()
