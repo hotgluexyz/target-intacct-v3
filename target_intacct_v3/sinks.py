@@ -47,6 +47,8 @@ class Suppliers(IntacctSink):
                 payload["RECORDNO"] = record["id"]
 
             else:
+                doc_seq_enabled = self.config.get("document_sequencing_enabled", False)
+                
                 # check for duplicates
                 vendor_id = payload.get(
                     "VENDORID"
@@ -67,9 +69,15 @@ class Suppliers(IntacctSink):
                             "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} due a vendor with same NAME exists."
                         }
                 else:
-                    return {
-                        "error": f"Skipping vendor due VENDORID is either missing or has unsupported chars. chars. Only letters, numbers and dashes accepted."
-                    }
+                    if doc_seq_enabled:
+                        if payload["NAME"] in IntacctSink.vendors.keys():
+                            return {
+                                "error": f"Skipping vendor with NAME: {payload['NAME']} due a vendor with same NAME exists."
+                            }
+                    else:
+                        return {
+                            "error": f"Skipping vendor due VENDORID is either missing or has unsupported chars. chars. Only letters, numbers and dashes accepted."
+                        }
 
             return {"VENDOR": payload}
         except Exception as e:
