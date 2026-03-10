@@ -799,7 +799,7 @@ class PurchaseInvoices(IntacctSink):
         supdoc_id = None
         if attachments:
             if not record_id:
-                self.logger.error("No RECORDID found in the payload. Skipping sendind attachments as no pk was found to create the folder and/or supdoc.")
+                self.logger.error("No RECORDID found in the payload. Skipping sending attachments as no pk was found to create the folder and/or supdoc.")
             try:
                 supdoc_id = self.post_attachments(attachments, record_id)
                 if supdoc_id:
