@@ -16,7 +16,7 @@ class Suppliers(IntacctSink):
     def preprocess_record(self, record: dict, context: dict) -> dict:
         try:
             # get list of vendors
-            self.get_vendors()
+            self.get_vendors_by_id()
 
             # map record
             addresses = parse_objs(record.get("addresses"))
@@ -59,20 +59,14 @@ class Suppliers(IntacctSink):
                     payload["VENDORID"] = vendor_id[
                         :20
                     ]  # Intact size limit on VENDORID (20 characters)
-
-                    if (payload["VENDORID"] in IntacctSink.vendors.items()):
-                        return {
-                                "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because a vendor with same VENDORID already exists."
-                            }
-                    if (payload["NAME"] in IntacctSink.vendors.keys()):
-                        return {
-                            "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because a vendor with same NAME already exists."
-                        }
+                    pass
+                    
                 else:
                     if doc_seq_enabled:
-                        if payload["NAME"] in IntacctSink.vendors.keys():
+                        sink_names = list(IntacctSink.vendors_by_id.values())
+                        if sink_names.count(payload["NAME"]) > 1:
                             return {
-                                "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because a vendor with same NAME already exists."
+                                "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because multiple vendors with the same NAME exist and cannot be deduplicated."
                             }
                     else:
                         return {
