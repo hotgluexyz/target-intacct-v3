@@ -16,7 +16,7 @@ class Suppliers(IntacctSink):
     def preprocess_record(self, record: dict, context: dict) -> dict:
         try:
             # get list of vendors
-            self.get_vendors_by_id()
+            self.get_vendors()
 
             # map record
             addresses = parse_objs(record.get("addresses"))
@@ -63,8 +63,10 @@ class Suppliers(IntacctSink):
                     
                 else:
                     if doc_seq_enabled:
-                        sink_names = list(IntacctSink.vendors_by_id.values())
-                        if sink_names.count(payload["NAME"]) > 1:
+                        vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(payload["NAME"])
+                        if vendor_name_count_on_intacct == 1:
+                            payload["VENDORID"] = IntacctSink.vendors.get(payload["NAME"])
+                        elif vendor_name_count_on_intacct > 1:
                             return {
                                 "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because multiple vendors with the same NAME exist and cannot be deduplicated."
                             }
@@ -82,7 +84,7 @@ class Suppliers(IntacctSink):
         if record.get("error"):
             raise Exception(record["error"])
         if record:
-            if record.get("VENDOR", {}).get("RECORDNO"):
+            if record.get("VENDOR", {}).get("RECORDNO") or record.get("VENDOR", {}).get("VENDORID"):
                 action = "update"
                 state_updates["is_updated"] = True
             else:
