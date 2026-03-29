@@ -59,7 +59,6 @@ class Suppliers(IntacctSink):
                     payload["VENDORID"] = vendor_id[
                         :20
                     ]  # Intact size limit on VENDORID (20 characters)
-                    pass
                     
                 else:
                     if doc_seq_enabled:
@@ -84,7 +83,10 @@ class Suppliers(IntacctSink):
         if record.get("error"):
             raise Exception(record["error"])
         if record:
-            if record.get("VENDOR", {}).get("RECORDNO") or record.get("VENDOR", {}).get("VENDORID"):
+            vendor_recordno = record.get("VENDOR", {}).get("RECORDNO")
+            vendor_id = record.get("VENDOR", {}).get("VENDORID")
+            if vendor_recordno or \
+                (vendor_id and IntacctSink.vendors_by_id is not None and vendor_id in IntacctSink.vendors_by_id):
                 action = "update"
                 state_updates["is_updated"] = True
             else:
