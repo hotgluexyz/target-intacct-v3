@@ -159,16 +159,16 @@ class APAdjustments(IntacctSink):
                 vendorname = item.pop("vendorname", None)
                 if vendorname and not item.get("vendorid"):
                     self.get_vendors()
-                    vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(item["vendorname"])
+                    vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendorname)
                     if vendor_name_count_on_intacct == 1:
-                        item["vendorid"] = IntacctSink.vendors[item["vendorname"]]
+                        item["vendorid"] = IntacctSink.vendors[vendorname]
                     elif vendor_name_count_on_intacct > 1:
                         raise Exception(
-                            f"ERROR: vendorname {item['vendorname']} not unique for this account, cannot resolve deduplication."
+                            f"ERROR: vendorname {vendorname} not unique for this account, cannot resolve deduplication."
                         )
                     else:
                         raise Exception(
-                            f"ERROR: vendorname {item['vendorname']} not found for this account."
+                            f"ERROR: vendorname {vendorname} not found for this account."
                         )
 
                 projectname = item.pop("projectname", None)
@@ -357,7 +357,6 @@ class Bills(IntacctSink):
             vendorname = record.get("vendorName")
             if vendorname and not payload.get("VENDORID"):
                 self.get_vendors()
-                #get vendorid by vendorname only if vendorName is unique on vendors_by_id
                 vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendorname)
                 if vendor_name_count_on_intacct == 1:
                     payload["VENDORID"] = IntacctSink.vendors[vendorname]
@@ -590,7 +589,6 @@ class PurchaseInvoices(IntacctSink):
             vendorname = record.get("supplierName")
             if vendorname and not payload.get("VENDORID"):
                 self.get_vendors()
-                #get vendorid by vendorname only if vendorName is unique on vendors_by_id
                 vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendorname)
                 if vendor_name_count_on_intacct == 1:
                     payload["VENDORID"] = IntacctSink.vendors[vendorname]
@@ -714,7 +712,6 @@ class PurchaseInvoices(IntacctSink):
 
                     if line.get("supplierName") and not item.get("VENDORID"):
                         self.get_vendors()
-                        #get vendorid by supplierName only if supplierName is unique on vendors_by_id
                         vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(line["supplierName"])
                         if vendor_name_count_on_intacct == 1:
                             item["VENDORID"] = IntacctSink.vendors[line["supplierName"]]
@@ -1012,7 +1009,6 @@ class PurchaseOrders(IntacctSink):
             vendor_name = record.get("vendorName")
             if vendor_name and not payload.get("vendorid"):
                 self.get_vendors()
-                #get vendorid by vendor_name only if vendor_name is unique on vendors_by_id
                 vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendor_name)
                 if vendor_name_count_on_intacct == 1:
                     payload["vendorid"] = IntacctSink.vendors[vendor_name]
