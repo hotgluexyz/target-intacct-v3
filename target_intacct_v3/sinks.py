@@ -160,16 +160,16 @@ class APAdjustments(IntacctSink):
                 if vendorname and not item.get("vendorid"):
                     self.get_vendors()
                     #get vendorid by vendorname only if vendorName is unique on vendors_by_id
-                    vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendorname)
+                    vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(item["vendorname"])
                     if vendor_name_count_on_intacct == 1:
-                        item["vendorid"] = IntacctSink.vendors[vendorname]
+                        item["vendorid"] = IntacctSink.vendors[item["vendorname"]]
                     elif vendor_name_count_on_intacct > 1:
                         raise Exception(
-                            f"ERROR: vendorname {vendorname} not unique for this account, cannot resolve deduplication."
+                            f"ERROR: vendorname {item["vendorname"]} not unique for this account, cannot resolve deduplication."
                         )
                     else:
                         raise Exception(
-                            f"ERROR: vendorname {vendorname} not found for this account."
+                            f"ERROR: vendorname {item["vendorname"]} not found for this account."
                         )
 
                 projectname = item.pop("projectname", None)
