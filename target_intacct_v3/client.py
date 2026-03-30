@@ -19,6 +19,7 @@ class IntacctSink(HotglueSink):
     endpoint = ""
     vendors = None
     vendors_recordno = None
+    vendors_by_id = None
     accounts = None
     locations = None
     projects = None
@@ -295,6 +296,7 @@ class IntacctSink(HotglueSink):
             vendors = self.get_records("VENDOR", ["VENDORID", "NAME", "RECORDNO"])
             IntacctSink.vendors = dictify(vendors, "NAME", "VENDORID")
             IntacctSink.vendors_recordno = dictify(vendors, "RECORDNO", "VENDORID")
+            IntacctSink.vendors_by_id = dictify(vendors, "VENDORID", "NAME")
         return IntacctSink.vendors
 
     def get_accounts(self):

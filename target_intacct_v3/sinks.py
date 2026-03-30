@@ -59,20 +59,15 @@ class Suppliers(IntacctSink):
                     payload["VENDORID"] = vendor_id[
                         :20
                     ]  # Intact size limit on VENDORID (20 characters)
-
-                    if (payload["VENDORID"] in IntacctSink.vendors.items()):
-                        return {
-                                "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because a vendor with same VENDORID already exists."
-                            }
-                    if (payload["NAME"] in IntacctSink.vendors.keys()):
-                        return {
-                            "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because a vendor with same NAME already exists."
-                        }
+                    
                 else:
                     if doc_seq_enabled:
-                        if payload["NAME"] in IntacctSink.vendors.keys():
+                        vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(payload["NAME"])
+                        if vendor_name_count_on_intacct == 1:
+                            payload["VENDORID"] = IntacctSink.vendors.get(payload["NAME"])
+                        elif vendor_name_count_on_intacct > 1:
                             return {
-                                "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because a vendor with same NAME already exists."
+                                "error": f"Skipping vendor with VENDORID: {vendor_id} and NAME: {payload['NAME']} because multiple vendors with the same NAME exist and cannot be deduplicated."
                             }
                     else:
                         return {
@@ -88,7 +83,10 @@ class Suppliers(IntacctSink):
         if record.get("error"):
             raise Exception(record["error"])
         if record:
-            if record.get("VENDOR", {}).get("RECORDNO"):
+            vendor_recordno = record.get("VENDOR", {}).get("RECORDNO")
+            vendor_id = record.get("VENDOR", {}).get("VENDORID")
+            if vendor_recordno or \
+                (vendor_id and IntacctSink.vendors_by_id is not None and vendor_id in IntacctSink.vendors_by_id):
                 action = "update"
                 state_updates["is_updated"] = True
             else:
