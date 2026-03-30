@@ -159,7 +159,6 @@ class APAdjustments(IntacctSink):
                 vendorname = item.pop("vendorname", None)
                 if vendorname and not item.get("vendorid"):
                     self.get_vendors()
-                    #get vendorid by vendorname only if vendorName is unique on vendors_by_id
                     vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(item["vendorname"])
                     if vendor_name_count_on_intacct == 1:
                         item["vendorid"] = IntacctSink.vendors[item["vendorname"]]
@@ -307,7 +306,6 @@ class JournalEntries(IntacctSink):
                 vendorname = je.get("vendorName")
                 if vendorname and not item.get("VENDORID"):
                     self.get_vendors()
-                    #get vendorid by vendorname only if vendorName is unique on vendors_by_id
                     vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendorname)
                     if vendor_name_count_on_intacct == 1:
                         item["VENDORID"] = IntacctSink.vendors.get(vendorname)
@@ -451,7 +449,6 @@ class Bills(IntacctSink):
 
                 if line.get("vendorName") and not item.get("VENDORID"):
                     self.get_vendors()
-                    #get vendorid by vendorname only if vendorName is unique on vendors_by_id
                     vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(line("vendorName"))
                     if vendor_name_count_on_intacct == 1:
                         item["VENDORID"] = IntacctSink.vendors[line("vendorName")]
