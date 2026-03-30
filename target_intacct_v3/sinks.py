@@ -448,9 +448,9 @@ class Bills(IntacctSink):
 
                 if line.get("vendorName") and not item.get("VENDORID"):
                     self.get_vendors()
-                    vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(line("vendorName"))
+                    vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(line["vendorName"])
                     if vendor_name_count_on_intacct == 1:
-                        item["VENDORID"] = IntacctSink.vendors[line("vendorName")]
+                        item["VENDORID"] = IntacctSink.vendors[line["vendorName"]]
 
                 class_name = line.get("className")
                 if class_name and not item.get("CLASSID"):
