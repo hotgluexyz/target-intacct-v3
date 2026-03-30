@@ -311,14 +311,6 @@ class JournalEntries(IntacctSink):
                     vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendorname)
                     if vendor_name_count_on_intacct == 1:
                         item["VENDORID"] = IntacctSink.vendors.get(vendorname)
-                    elif vendor_name_count_on_intacct > 1:
-                        raise Exception(
-                            f"ERROR: vendorname {vendorname} not unique for this account, cannot resolve deduplication."
-                        )
-                    else:
-                        raise Exception(
-                            f"ERROR: vendorname {vendorname} not found for this account."
-                        )
 
                 payload["ENTRIES"]["GLENTRY"].append(item)
 
