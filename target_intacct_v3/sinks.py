@@ -125,7 +125,8 @@ class APAdjustments(IntacctSink):
             self.get_vendors()
             if (
                 payload.get("vendorname")
-                and payload.get("vendorid") not in IntacctSink.vendors.values()
+                and payload.get("vendorid") not in IntacctSink.vendors_by_id.keys()
+                and list(IntacctSink.vendors_by_id.values()).count(payload.get("vendorname")) == 1
             ):
                 payload["vendorid"] = IntacctSink.vendors.get(payload["vendorname"])
 
@@ -158,9 +159,15 @@ class APAdjustments(IntacctSink):
                 vendorname = item.pop("vendorname", None)
                 if vendorname and not item.get("vendorid"):
                     self.get_vendors()
-                    try:
+                    #get vendorid by vendorname only if vendorName is unique on vendors_by_id
+                    vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(item["vendorname"])
+                    if vendor_name_count_on_intacct == 1:
                         item["vendorid"] = IntacctSink.vendors[item["vendorname"]]
-                    except:
+                    elif vendor_name_count_on_intacct > 1:
+                        raise Exception(
+                            f"ERROR: vendorname {item['vendorname']} not unique for this account, cannot resolve deduplication."
+                        )
+                    else:
                         raise Exception(
                             f"ERROR: vendorname {item['vendorname']} not found for this account."
                         )
@@ -300,7 +307,10 @@ class JournalEntries(IntacctSink):
                 vendorname = je.get("vendorName")
                 if vendorname and not item.get("VENDORID"):
                     self.get_vendors()
-                    item["VENDORID"] = IntacctSink.vendors.get(vendorname)
+                    #get vendorid by vendorname only if vendorName is unique on vendors_by_id
+                    vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendorname)
+                    if vendor_name_count_on_intacct == 1:
+                        item["VENDORID"] = IntacctSink.vendors.get(vendorname)
 
                 payload["ENTRIES"]["GLENTRY"].append(item)
 
@@ -349,9 +359,15 @@ class Bills(IntacctSink):
             vendorname = record.get("vendorName")
             if vendorname and not payload.get("VENDORID"):
                 self.get_vendors()
-                try:
+                #get vendorid by vendorname only if vendorName is unique on vendors_by_id
+                vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendorname)
+                if vendor_name_count_on_intacct == 1:
                     payload["VENDORID"] = IntacctSink.vendors[vendorname]
-                except:
+                elif vendor_name_count_on_intacct > 1:
+                    return {
+                        "error": f"ERROR: Vendor {vendorname} not unique, cannot resolve deduplication."
+                    }
+                else:
                     return {
                         "error": f"ERROR: Vendor {vendorname} does not exist. Did you mean any of these: {list(IntacctSink.vendors.keys())}?"
                     }
@@ -359,7 +375,7 @@ class Bills(IntacctSink):
             vendor_number = record.get("vendorNum")
             if not payload.get("VENDORID") and vendor_number:
                 self.get_vendors()
-                if vendor_number in IntacctSink.vendors.values():
+                if vendor_number in IntacctSink.vendors_by_id.keys():
                     payload["VENDORID"] = vendor_number
                 else:
                     return {
@@ -435,7 +451,10 @@ class Bills(IntacctSink):
 
                 if line.get("vendorName") and not item.get("VENDORID"):
                     self.get_vendors()
-                    item["VENDORID"] = IntacctSink.vendors[line["vendorName"]]
+                    #get vendorid by vendorname only if vendorName is unique on vendors_by_id
+                    vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(line("vendorName"))
+                    if vendor_name_count_on_intacct == 1:
+                        item["VENDORID"] = IntacctSink.vendors[line("vendorName")]
 
                 class_name = line.get("className")
                 if class_name and not item.get("CLASSID"):
@@ -574,9 +593,15 @@ class PurchaseInvoices(IntacctSink):
             vendorname = record.get("supplierName")
             if vendorname and not payload.get("VENDORID"):
                 self.get_vendors()
-                try:
+                #get vendorid by vendorname only if vendorName is unique on vendors_by_id
+                vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendorname)
+                if vendor_name_count_on_intacct == 1:
                     payload["VENDORID"] = IntacctSink.vendors[vendorname]
-                except:
+                elif vendor_name_count_on_intacct > 1:
+                    return {
+                        "error": f"ERROR: Vendor {vendorname} not unique for this account, cannot resolve deduplication."
+                    }
+                else:
                     return {
                         "error": f"ERROR: Vendor {vendorname} does not exist. Did you mean any of these: {list(IntacctSink.vendors.keys())}?"
                     }
@@ -584,7 +609,7 @@ class PurchaseInvoices(IntacctSink):
             vendor_number = record.get("vendorNum")
             if not payload.get("VENDORID") and vendor_number:
                 self.get_vendors()
-                if vendor_number in IntacctSink.vendors.values():
+                if vendor_number in IntacctSink.vendors_by_id.keys():
                     payload["VENDORID"] = vendor_number
                 else:
                     return {
@@ -692,7 +717,10 @@ class PurchaseInvoices(IntacctSink):
 
                     if line.get("supplierName") and not item.get("VENDORID"):
                         self.get_vendors()
-                        item["VENDORID"] = IntacctSink.vendors[line["supplierName"]]
+                        #get vendorid by supplierName only if supplierName is unique on vendors_by_id
+                        vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(line["supplierName"])
+                        if vendor_name_count_on_intacct == 1:
+                            item["VENDORID"] = IntacctSink.vendors[line["supplierName"]]
 
                     class_name = line.get("className")
                     if class_name and not item.get("CLASSID"):
@@ -987,9 +1015,15 @@ class PurchaseOrders(IntacctSink):
             vendor_name = record.get("vendorName")
             if vendor_name and not payload.get("vendorid"):
                 self.get_vendors()
-                try:
+                #get vendorid by vendor_name only if vendor_name is unique on vendors_by_id
+                vendor_name_count_on_intacct = list(IntacctSink.vendors_by_id.values()).count(vendor_name)
+                if vendor_name_count_on_intacct == 1:
                     payload["vendorid"] = IntacctSink.vendors[vendor_name]
-                except:
+                elif vendor_name_count_on_intacct > 1:
+                    return {
+                        "error": f"ERROR: Vendor {vendor_name} not unique, cannot resolve deduplication."
+                    }
+                else:
                     return {
                         "error": f"ERROR: Vendor {vendor_name} does not exist. Did you mean any of these: {list(IntacctSink.vendors.keys())}?"
                     }
