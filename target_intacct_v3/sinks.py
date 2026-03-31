@@ -714,12 +714,15 @@ class PurchaseInvoices(IntacctSink):
                     account_name = line.get("accountName")
                     account_id = line.get("accountId")
                     account_number = line.get("accountNumber")
+                    
                     if account_id:
                         item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
-                    elif account_name and account_name in IntacctSink.accounts:
-                        item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
+                        
                     elif account_number and account_number in IntacctSink.accounts.values():
                         item["ACCOUNTNO"] = account_number
+                        
+                    elif account_name and account_name in IntacctSink.accounts:
+                        item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
                         
                     if not item.get("ACCOUNTNO"):
                         return {
