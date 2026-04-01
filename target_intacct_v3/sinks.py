@@ -654,10 +654,8 @@ class PurchaseInvoices(IntacctSink):
 
             # include locationid at header level
             address = parse_objs(record.get("addresses", "[]"))
-            locationname = None
-            if address:
-                address_location = address[0].get("name")
-                locationname = record.get("location") or address_location
+            address_location = address[0].get("name") if address else None
+            locationname = record.get("location") or address_location
             if locationname and not payload.get("LOCATIONID"):
                 self.get_locations()
                 try:
