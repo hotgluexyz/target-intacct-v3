@@ -43,6 +43,9 @@ class Suppliers(IntacctSink):
                 },
             }
 
+            if record.get("supdocId"):
+                payload["SUPDOCID"] = record["supdocId"]
+            
             if record.get("id"):
                 payload["RECORDNO"] = record["id"]
 
