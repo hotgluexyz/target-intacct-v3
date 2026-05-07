@@ -41,7 +41,12 @@ class Suppliers(IntacctSink):
                         "COUNTRY": address.get("country"),
                     }
                 },
+                "RECORDID": record.get("invoiceNumber")
             }
+
+
+            if record.get("attachments"):
+                payload["attachments"] = record["attachments"]
 
             if record.get("supdocId"):
                 payload["SUPDOCID"] = record["supdocId"]
@@ -86,8 +91,21 @@ class Suppliers(IntacctSink):
         if record.get("error"):
             raise Exception(record["error"])
         if record:
+            payload = record.get("VENDOR", {})
             vendor_recordno = record.get("VENDOR", {}).get("RECORDNO")
             vendor_id = record.get("VENDOR", {}).get("VENDORID")
+            attachments = payload.get("attachments")
+            record_id = payload.get("RECORDID")
+            if attachments:
+                if not record_id:
+                    self.logger.error("No RECORDID found in the payload. Skipping sending attachments as no pk was found to create the folder and/or supdoc.")
+                try:
+                    supdoc_id = self.post_attachments(attachments, record_id)
+                    if supdoc_id:
+                        payload["SUPDOCID"] = supdoc_id
+                except Exception as e:
+                    self.logger.error(f"Failed to post attachments for RECORDID {record_id}: {e}")
+                    raise
             if vendor_recordno or \
                 (vendor_id and IntacctSink.vendors_by_id is not None and vendor_id in IntacctSink.vendors_by_id):
                 action = "update"
