@@ -94,23 +94,6 @@ class Suppliers(IntacctSink):
         if record.get("error"):
             raise Exception(record["error"])
         if record:
-<<<<<<< HEAD
-            payload = record.get("VENDOR", {})
-            vendor_recordno = record.get("VENDOR", {}).get("RECORDNO")
-            vendor_id = record.get("VENDOR", {}).get("VENDORID")
-            attachments = payload.get("attachments")
-            record_id = payload.get("RECORDID")
-            if attachments:
-                if not record_id:
-                    self.logger.error("No RECORDID found in the payload. Skipping sending attachments as no pk was found to create the folder and/or supdoc.")
-                try:
-                    supdoc_id = self.post_attachments(attachments, record_id)
-                    if supdoc_id:
-                        payload["SUPDOCID"] = supdoc_id
-                except Exception as e:
-                    self.logger.error(f"Failed to post attachments for RECORDID {record_id}: {e}")
-                    raise
-=======
             payload = record["payload"]
             vendor = payload["VENDOR"]
             vendor_recordno = vendor.get("RECORDNO")
@@ -128,7 +111,6 @@ class Suppliers(IntacctSink):
                     except Exception as e:
                         self.logger.error(f"Failed to post attachments for RECORDID {record_id}: {e}")
                         raise
->>>>>>> 05009cb (Add SUPDOCID to return payload if record include SUPDOCID. If attachments is included in record, and record id is included in payload, post attachments with record id and then add id of posted attachment to payload as SUPDOCID)
             if vendor_recordno or \
                 (vendor_id and IntacctSink.vendors_by_id is not None and vendor_id in IntacctSink.vendors_by_id):
                 action = "update"
