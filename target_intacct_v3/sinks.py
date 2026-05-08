@@ -41,8 +41,16 @@ class Suppliers(IntacctSink):
                         "COUNTRY": address.get("country"),
                     }
                 },
+                "RECORDID": record.get("invoiceNumber")
             }
 
+
+            if record.get("attachments"):
+                payload["attachments"] = record["attachments"]
+
+            if record.get("supdocId"):
+                payload["SUPDOCID"] = record["supdocId"]
+            
             if record.get("id"):
                 payload["RECORDNO"] = record["id"]
 
@@ -73,7 +81,10 @@ class Suppliers(IntacctSink):
                         return {
                             "error": f"Skipping vendor because VENDORID is either missing or has unsupported chars. Only letters, numbers and dashes accepted."
                         }
-            return {"VENDOR": payload}
+            return {
+                "payload": {"VENDOR": payload},
+                "attachments": record.get("attachments"),
+            }
         except Exception as e:
             return {"error": e.__repr__()}
 
@@ -83,15 +94,30 @@ class Suppliers(IntacctSink):
         if record.get("error"):
             raise Exception(record["error"])
         if record:
-            vendor_recordno = record.get("VENDOR", {}).get("RECORDNO")
-            vendor_id = record.get("VENDOR", {}).get("VENDORID")
+            payload = record["payload"]
+            vendor = payload["VENDOR"]
+            vendor_recordno = vendor.get("RECORDNO")
+            vendor_id = vendor.get("VENDORID")
+            attachments = record.get("attachments")
+            record_id = vendor.get("RECORDID")
+            if attachments:
+                if not record_id:
+                    self.logger.error("No RECORDID found in the payload. Skipping sending attachments as no pk was found to create the folder and/or supdoc.")
+                else:
+                    try:
+                        supdoc_id = self.post_attachments(attachments, record_id)
+                        if supdoc_id:
+                            vendor["SUPDOCID"] = supdoc_id
+                    except Exception as e:
+                        self.logger.error(f"Failed to post attachments for RECORDID {record_id}: {e}")
+                        raise
             if vendor_recordno or \
                 (vendor_id and IntacctSink.vendors_by_id is not None and vendor_id in IntacctSink.vendors_by_id):
                 action = "update"
                 state_updates["is_updated"] = True
             else:
                 action = "create"
-            response = self.request_api("POST", request_data={action: record})
+            response = self.request_api("POST", request_data={action: payload})
             id = response["data"]["vendor"]["RECORDNO"]
             state_updates = self.get_record_url("VENDOR", id, state_updates)
             return id, True, state_updates
