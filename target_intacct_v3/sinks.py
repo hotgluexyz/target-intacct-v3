@@ -562,7 +562,7 @@ class PurchaseInvoices(IntacctSink):
                 "DOCNUMBER": record.get("number"),
                 "DESCRIPTION": record.get("description"),
                 "RECORDNO": record.get("id"),
-                "INCLUSIVETAX": "true" if record.get("inclusivetax") else None,
+                "INCLUSIVETAX": None,
             }
 
             if record.get("supplierId"):
@@ -669,14 +669,14 @@ class PurchaseInvoices(IntacctSink):
             if bill_state == "Paid":
                 self.logger.info("Bill is already paid. Skipping the line items.")
             else:
-                use_gross = record.get("inclusivetax")
+                use_gross = record.get("use_gross_total")
                 bill_items = []
                 lines = parse_objs(record.get("lineItems", "[]"))
                 for line in lines:
                     item = {
                         "PROJECTID": line.get("projectId"),
-                        # gross mode: TOTALTRXAMOUNT (inclusive tax); net mode: TRX_AMOUNT (existing behaviour)
-                        "TOTALTRXAMOUNT" if use_gross else "TRX_AMOUNT": (
+                        # gross mode: send grossPrice (net + taxes) as TRX_AMOUNT
+                        "TRX_AMOUNT": (
                             line.get("grossPrice") if use_gross else line.get("totalPrice", line.get("amount"))
                         ),
                         "ACCOUNTNAME": line.get("accountName"),
@@ -778,11 +778,6 @@ class PurchaseInvoices(IntacctSink):
                             for cf in custom_fields
                         ]
                     
-                    if use_gross:
-                        tax_detail_id = line.get("taxDetailId")
-                        if tax_detail_id:
-                            item["TAXENTRIES"] = {"TAXENTRY": {"DETAILID": tax_detail_id}}
-
                     bill_items.append(item)
 
                     # get employee id
