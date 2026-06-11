@@ -721,9 +721,11 @@ class PurchaseInvoices(IntacctSink):
                         item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
                         
                     if not item.get("ACCOUNTNO"):
-                        return {
-                            "error": f"ERROR: ACCOUNTNAME or ACCOUNTNO not found for this tenant in item {item}. \n Intaccts Requires an ACCOUNTNO associated with each line item"
-                        }
+                        if not account_name:
+                            return {
+                                "error": f"ERROR: ACCOUNTNAME or ACCOUNTNO not found for this tenant in item {item}. \n Intaccts Requires an ACCOUNTNO associated with each line item"
+                            }
+                        self.logger.warning(f"ACCOUNTNO lookup failed for '{account_name}', falling back to ACCOUNTNAME")
 
                     # departmentid is optional
                     department_id = line.get("departmentId")
