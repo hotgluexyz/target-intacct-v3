@@ -453,14 +453,17 @@ class Bills(IntacctSink):
                 account_number = line.get("accountNumber")
                 
                 if account_id:
-                    item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
-                    
-                elif account_number and account_number in IntacctSink.accounts.values():
-                    item["ACCOUNTNO"] = account_number
+                    try:
+                        item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
+                    except Exception:
+                        self.logger.warning(f"ACCOUNTNO lookup by ID '{account_id}' failed, falling back to name lookup")
 
-                elif account_name and account_name in IntacctSink.accounts:
-                    item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
-                    
+                if not item.get("ACCOUNTNO"):
+                    if account_number and account_number in IntacctSink.accounts.values():
+                        item["ACCOUNTNO"] = account_number
+                    elif account_name and account_name in IntacctSink.accounts:
+                        item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
+
                 if not item.get("ACCOUNTNO"):
                     return {
                         "error": f"ERROR: ACCOUNTNAME or ACCOUNTNO not found for this tenant in item {item}. \n Intaccts Requires an ACCOUNTNO associated with each line item"
@@ -712,14 +715,17 @@ class PurchaseInvoices(IntacctSink):
                     account_number = line.get("accountNumber")
                     
                     if account_id:
-                        item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
-                        
-                    elif account_number and account_number in IntacctSink.accounts.values():
-                        item["ACCOUNTNO"] = account_number
-                        
-                    elif account_name and account_name in IntacctSink.accounts:
-                        item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
-                        
+                        try:
+                            item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
+                        except Exception:
+                            self.logger.warning(f"ACCOUNTNO lookup by ID '{account_id}' failed, falling back to name lookup")
+
+                    if not item.get("ACCOUNTNO"):
+                        if account_number and account_number in IntacctSink.accounts.values():
+                            item["ACCOUNTNO"] = account_number
+                        elif account_name and account_name in IntacctSink.accounts:
+                            item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
+
                     if not item.get("ACCOUNTNO"):
                         if not account_name:
                             return {
