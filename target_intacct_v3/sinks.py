@@ -734,10 +734,9 @@ class PurchaseInvoices(IntacctSink):
                         dept_recordno = str(department_id)
                         department_id_value = IntacctSink.departments_recordno.get(dept_recordno)
                         if not department_id_value:
-                            return {
-                                "error": f"ERROR: Department with RECORDNO '{dept_recordno}' does not exist."
-                            }
-                        item["DEPARTMENTID"] = department_id_value
+                            self.logger.warning(f"Department with RECORDNO '{dept_recordno}' not found, skipping DEPARTMENTID")
+                        else:
+                            item["DEPARTMENTID"] = department_id_value
                     elif department or department_name:
                         self.get_departments()
                         item["DEPARTMENTID"] = IntacctSink.departments.get(
