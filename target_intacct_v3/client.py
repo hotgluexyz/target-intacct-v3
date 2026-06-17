@@ -477,7 +477,8 @@ class IntacctSink(HotglueSink):
         account = self.request_api("POST", request_data={"query": {"object": "GLACCOUNT", "select": {"field": ["ACCOUNTNO", "RECORDNO"]}, "filter": {"equalto": {"field": "RECORDNO", "value": f"{account_id}"}}}})
         if account:
             return account.get("data", {}).get("GLACCOUNT", {}).get("ACCOUNTNO")
-        raise Exception(f"Account with account_id {account_id} not found.")
+        self.logger.warning(f"ACCOUNTNO lookup by ID '{account_id}' failed!")
+        return None
     
 
     def get_record_url(self, object, record_id, state_updates):

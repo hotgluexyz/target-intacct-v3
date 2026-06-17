@@ -455,10 +455,10 @@ class Bills(IntacctSink):
                 if account_id:
                     item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
                     
-                elif account_number and account_number in IntacctSink.accounts.values():
+                if not item.get("ACCOUNTNO") and account_number and account_number in IntacctSink.accounts.values():
                     item["ACCOUNTNO"] = account_number
 
-                elif account_name and account_name in IntacctSink.accounts:
+                if not item.get("ACCOUNTNO") and account_name and account_name in IntacctSink.accounts:
                     item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
                     
                 if not item.get("ACCOUNTNO"):
@@ -714,10 +714,10 @@ class PurchaseInvoices(IntacctSink):
                     if account_id:
                         item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
                         
-                    elif account_number and account_number in IntacctSink.accounts.values():
+                    if not item.get("ACCOUNTNO") and account_number and account_number in IntacctSink.accounts.values():
                         item["ACCOUNTNO"] = account_number
-                        
-                    elif account_name and account_name in IntacctSink.accounts:
+                    
+                    if not item.get("ACCOUNTNO") and account_name and account_name in IntacctSink.accounts:
                         item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
                         
                     if not item.get("ACCOUNTNO"):
