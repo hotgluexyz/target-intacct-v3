@@ -23,6 +23,7 @@ class IntacctSink(HotglueSink):
     accounts = None
     locations = None
     projects = None
+    projects_by_id = None
     classes = None
     departments = None
     departments_recordno = None
@@ -309,6 +310,9 @@ class IntacctSink(HotglueSink):
         if IntacctSink.projects is None:
             projects = self.get_records("PROJECT", ["PROJECTID", "NAME"])
             IntacctSink.projects = dictify(projects, "NAME", "PROJECTID")
+            # fallback: allow matching by PROJECTID (code) as well as NAME,
+            # since some tenants store the project code (e.g. "262-87040") in the source field
+            IntacctSink.projects_by_id = dictify(projects, "PROJECTID", "PROJECTID")
         return IntacctSink.projects
 
     def get_locations(self):

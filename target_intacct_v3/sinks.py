@@ -766,7 +766,14 @@ class PurchaseInvoices(IntacctSink):
                     project_name = line.get("projectName")
                     if project_name and not item["PROJECTID"]:
                         self.get_projects()
-                        item["PROJECTID"] = IntacctSink.projects.get(project_name)
+                        item["PROJECTID"] = (
+                            IntacctSink.projects.get(project_name)
+                            or IntacctSink.projects_by_id.get(project_name)
+                        )
+                        if not item["PROJECTID"]:
+                            self.logger.warning(
+                                f"PROJECT '{project_name}' not found by NAME or PROJECTID — leaving PROJECTID empty"
+                            )
 
                     item_name = line.get("productName")
                     if item_name:
