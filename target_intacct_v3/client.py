@@ -415,7 +415,8 @@ class IntacctSink(HotglueSink):
 
     def post_attachments(self, attachments, record_id):
 
-        supdoc_id = str(record_id).replace("-","")[-20:]  # supdocid only allows 20 chars
+        supdoc_id = str(record_id).replace("-", "")[-20:]  # supdocid only allows 20 chars
+        supdoc_id = supdoc_id.strip()  # Supdoc ID cannot contain leading or trailing spaces.
         self.logger.info(f"Transforming record_id: {record_id} into supdoc_id: {supdoc_id}")
         # 1. check if supdoc exists and get existing attachments
         try:
@@ -425,7 +426,6 @@ class IntacctSink(HotglueSink):
         except Exception as e:
             self.logger.error(f"Failed to check existing supdoc for record {supdoc_id}: {e.__repr__()}")
             return
-        
 
         # getting existing attachments
         existing_attachments = {"names": [], "content": []}
@@ -441,7 +441,8 @@ class IntacctSink(HotglueSink):
 
         # prepare attachments payload
         try:
-            att_payload = self.prepare_attachment_payload(attachments, supdoc_id, existing_attachments, folder_id=record_id)
+            att_payload = self.prepare_attachment_payload(attachments, supdoc_id, existing_attachments,
+                                                          folder_id=record_id)
         except Exception as e:
             self.logger.error(f"Failed to prepare attachment payload for record {record_id}: {e.__repr__()}")
             return
