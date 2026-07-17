@@ -73,7 +73,7 @@ class Suppliers(IntacctSink):
                         return {
                             "error": f"Skipping vendor because VENDORID is either missing or has unsupported chars. Only letters, numbers and dashes accepted."
                         }
-            return {"VENDOR": payload}
+            return {"payload": {"VENDOR": payload}, "attachments": record.get("attachments")}
         except Exception as e:
             return {"error": e.__repr__()}
 
@@ -83,18 +83,47 @@ class Suppliers(IntacctSink):
         if record.get("error"):
             raise Exception(record["error"])
         if record:
-            vendor_recordno = record.get("VENDOR", {}).get("RECORDNO")
-            vendor_id = record.get("VENDOR", {}).get("VENDORID")
+            payload, attachments = record.get("payload"), record.get("attachments")
+            vendor_recordno = payload.get("VENDOR", {}).get("RECORDNO")
+            vendor_id = payload.get("VENDOR", {}).get("VENDORID")
             if vendor_recordno or \
                 (vendor_id and IntacctSink.vendors_by_id is not None and vendor_id in IntacctSink.vendors_by_id):
                 action = "update"
                 state_updates["is_updated"] = True
             else:
                 action = "create"
-            response = self.request_api("POST", request_data={action: record})
-            id = response["data"]["vendor"]["RECORDNO"]
-            state_updates = self.get_record_url("VENDOR", id, state_updates)
-            return id, True, state_updates
+
+            # post/update attachments if exist
+            supdoc_id = None
+            record_id = vendor_id or vendor_recordno
+            if attachments:
+                if not record_id:
+                    self.logger.error("No VENDORID or RECORDNO found in the payload. Skipping sending attachments as no pk was found to create the folder and/or supdoc.")
+                else:
+                    try:
+                        supdoc_id = self.post_attachments(attachments, record_id)
+                        if supdoc_id:
+                            payload["VENDOR"]["SUPDOCID"] = supdoc_id
+                    except Exception as e:
+                        self.logger.error(f"Failed to post attachments for VENDORID {record_id}: {e}")
+                        raise
+
+            try:
+                response = self.request_api("POST", request_data={action: payload})
+                id = response["data"]["vendor"]["RECORDNO"]
+                state_updates = self.get_record_url("VENDOR", id, state_updates)
+                return id, True, state_updates
+            except Exception as e:
+                self.logger.error(f"Failed to {action} vendor with VENDORID {record_id}: {e}")
+
+                # if vendor is new and attachments were sent, delete them since creation failed
+                if supdoc_id and action == "create":
+                    try:
+                        self.logger.info(f"Deleting attachments for failed vendor creation with VENDORID {record_id}...")
+                        self.request_api("POST", request_data={"delete_supdoc": {"@key": supdoc_id}})
+                    except Exception as delete_error:
+                        self.logger.error(f"Failed to delete attachments with SUPDOCID {supdoc_id}: {delete_error}")
+                raise Exception(f"Failed to {action} vendor: {e}")
 
 
 class APAdjustments(IntacctSink):
