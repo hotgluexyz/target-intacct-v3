@@ -92,7 +92,7 @@ def test_invoices_preprocess_maps_header_and_line(monkeypatch):
     assert invoice["WHENPOSTED"] == "2026-08-24"
     assert invoice["WHENDUE"] == "2026-09-23"
     assert invoice["BASECURR"] == "USD"
-    line = invoice["INVOICEITEMS"]["INVOICEITEM"][0]
+    line = invoice["ARINVOICEITEMS"]["arinvoiceitem"][0]
     assert line["ACCOUNTNO"] == "4000"
     assert line["TRX_AMOUNT"] == 100.0
     assert line["ENTRYDESCRIPTION"] == "Intacct Demo Subscription"

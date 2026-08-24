@@ -635,7 +635,7 @@ class Invoices(IntacctSink):
                 "WHENCREATED": when_created,
                 "WHENPOSTED": record.get("issueDate"),
                 "DESCRIPTION": record.get("description"),
-                "INVOICEITEMS": {"INVOICEITEM": []},
+                "ARINVOICEITEMS": {"arinvoiceitem": []},
                 "CUSTOMERID": record.get("customerId"),
                 "RECORDID": record.get("invoiceNumber"),
                 "LOCATIONID": record.get("locationId"),
@@ -749,7 +749,7 @@ class Invoices(IntacctSink):
                         department_name
                     )
 
-                payload["INVOICEITEMS"]["INVOICEITEM"].append(item)
+                payload["ARINVOICEITEMS"]["arinvoiceitem"].append(item)
 
             payload = clean_convert(payload)
             return {"payload": {"ARINVOICE": payload}}
