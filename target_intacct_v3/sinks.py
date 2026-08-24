@@ -623,10 +623,16 @@ class Invoices(IntacctSink):
 
     def preprocess_record(self, record: dict, context: dict) -> dict:
         try:
+            created_at = record.get("createdAt")
+            when_created = (
+                created_at.split("T")[0]
+                if isinstance(created_at, str) and created_at
+                else record.get("issueDate")
+            )
             payload = {
                 "WHENDUE": record.get("dueDate"),
                 "BASECURR": record.get("currency"),
-                "WHENCREATED": record.get("createdAt", "").split("T")[0] if record.get("createdAt") else None,
+                "WHENCREATED": when_created,
                 "WHENPOSTED": record.get("issueDate"),
                 "DESCRIPTION": record.get("description"),
                 "INVOICEITEMS": {"INVOICEITEM": []},

@@ -88,6 +88,7 @@ def test_invoices_preprocess_maps_header_and_line(monkeypatch):
     invoice = result["payload"]["ARINVOICE"]
     assert invoice["RECORDID"] == "I-000001"
     assert invoice["CUSTOMERID"] == "A-000001"
+    assert invoice["WHENCREATED"] == "2026-08-24"
     assert invoice["WHENPOSTED"] == "2026-08-24"
     assert invoice["WHENDUE"] == "2026-09-23"
     assert invoice["BASECURR"] == "USD"
@@ -95,3 +96,24 @@ def test_invoices_preprocess_maps_header_and_line(monkeypatch):
     assert line["ACCOUNTNO"] == "4000"
     assert line["TRX_AMOUNT"] == 100.0
     assert line["ENTRYDESCRIPTION"] == "Intacct Demo Subscription"
+
+
+def test_invoices_whencreated_prefers_created_at(monkeypatch):
+    sink = _invoices_sink()
+    monkeypatch.setattr(sink, "get_records", lambda *args, **kwargs: [])
+    result = sink.preprocess_record(
+        {
+            "invoiceNumber": "I-000001",
+            "customerNumber": "A-000001",
+            "createdAt": "2026-08-20T12:00:00Z",
+            "issueDate": "2026-08-24",
+            "dueDate": "2026-09-23",
+            "currency": "USD",
+            "lineItems": [{"description": "Line", "amount": 10.0, "accountNumber": "4000"}],
+        },
+        {},
+    )
+
+    invoice = result["payload"]["ARINVOICE"]
+    assert invoice["WHENCREATED"] == "2026-08-20"
+    assert invoice["WHENPOSTED"] == "2026-08-24"
