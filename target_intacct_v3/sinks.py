@@ -700,6 +700,11 @@ class Invoices(IntacctSink):
                         "error": f"ERROR: Location '{locationname}' does not exist. Did you mean any of these: {list(IntacctSink.locations.keys())}?"
                     }
 
+            if not payload.get("LOCATIONID"):
+                payload["LOCATIONID"] = self.config.get("default_location_id") or self.config.get(
+                    "location_id"
+                )
+
             lines = parse_objs(record.get("lineItems", "[]"))
             for line in lines:
                 item = {

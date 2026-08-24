@@ -117,3 +117,27 @@ def test_invoices_whencreated_prefers_created_at(monkeypatch):
     invoice = result["payload"]["ARINVOICE"]
     assert invoice["WHENCREATED"] == "2026-08-20"
     assert invoice["WHENPOSTED"] == "2026-08-24"
+
+
+def test_invoices_default_location_from_config(monkeypatch):
+    target = TargetIntacctV3(
+        config={**SAMPLE_CONFIG, "default_location_id": "100"},
+        validate_config=False,
+    )
+    sink = target.get_sink("Invoices", schema={"type": "object", "properties": {}})
+    monkeypatch.setattr(sink, "get_records", lambda *args, **kwargs: [])
+    result = sink.preprocess_record(
+        {
+            "invoiceNumber": "I-000001",
+            "customerNumber": "A-000001",
+            "issueDate": "2026-08-24",
+            "dueDate": "2026-09-23",
+            "currency": "USD",
+            "lineItems": [{"description": "Line", "amount": 10.0, "accountNumber": "4000"}],
+        },
+        {},
+    )
+
+    invoice = result["payload"]["ARINVOICE"]
+    assert invoice["LOCATIONID"] == "100"
+    assert invoice["ARINVOICEITEMS"]["arinvoiceitem"][0]["LOCATIONID"] == "100"
