@@ -27,6 +27,9 @@ class IntacctSink(HotglueSink):
     departments = None
     departments_recordno = None
     items = None
+    customers = None
+    customers_recordno = None
+    customers_by_id = None
     previous_stream = None
     controlid_list = []
 
@@ -334,8 +337,10 @@ class IntacctSink(HotglueSink):
 
     def get_customers(self):
         if IntacctSink.customers is None:
-            customers = self.get_records("CUSTOMER", ["CUSTOMERID", "NAME"])
+            customers = self.get_records("CUSTOMER", ["CUSTOMERID", "NAME", "RECORDNO"])
             IntacctSink.customers = dictify(customers, "NAME", "CUSTOMERID")
+            IntacctSink.customers_recordno = dictify(customers, "RECORDNO", "CUSTOMERID")
+            IntacctSink.customers_by_id = dictify(customers, "CUSTOMERID", "NAME")
         return IntacctSink.customers
 
     def get_items(self):

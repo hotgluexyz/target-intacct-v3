@@ -5,6 +5,8 @@ from target_hotglue.target import TargetHotglue
 from target_intacct_v3.sinks import (
     APAdjustments,
     Bills,
+    Customers,
+    Invoices,
     JournalEntries,
     PurchaseInvoices,
     Suppliers,
@@ -45,7 +47,7 @@ class TargetIntacctV3(TargetHotglue):
             th.BooleanType,
         ),
     ).to_dict()
-    SINK_TYPES = [Suppliers, APAdjustments, JournalEntries, Bills, PurchaseInvoices, BillPayment, PurchaseOrders]
+    SINK_TYPES = [Suppliers, Customers, Invoices, APAdjustments, JournalEntries, Bills, PurchaseInvoices, BillPayment, PurchaseOrders]
 
 
 if __name__ == "__main__":

@@ -97,6 +97,84 @@ class Suppliers(IntacctSink):
             return id, True, state_updates
 
 
+class Customers(IntacctSink):
+    """IntacctV3 target sink class."""
+
+    name = "Customers"
+
+    def preprocess_record(self, record: dict, context: dict) -> dict:
+        try:
+            self.get_customers()
+
+            addresses = parse_objs(record.get("addresses"))
+            address = addresses[0] if addresses else {}
+
+            payload = {
+                "CUSTOMERID": record.get("customerNumber"),
+                "NAME": record.get("customerName"),
+                "CURRENCY": record.get("currency"),
+                "DISPLAYCONTACT": {
+                    "EMAIL1": record.get("email"),
+                    "MAILADDRESS": {
+                        "ADDRESS1": address.get("line1"),
+                        "ADDRESS2": address.get("line2"),
+                        "CITY": address.get("city"),
+                        "STATE": address.get("state"),
+                        "ZIP": address.get("postalCode"),
+                        "COUNTRY": address.get("country"),
+                    },
+                },
+            }
+
+            if record.get("id"):
+                payload["RECORDNO"] = record["id"]
+            else:
+                customer_id = payload.get("CUSTOMERID")
+                if customer_id and re.match("^[A-Za-z0-9- ]*$", customer_id):
+                    if len(customer_id) > 20:
+                        self.logger.info(
+                            f"Truncating CUSTOMERID due to size limit (>20 characters): {customer_id}"
+                        )
+                    payload["CUSTOMERID"] = customer_id[:20]
+                else:
+                    return {
+                        "error": "Skipping customer because CUSTOMERID is either missing or has unsupported chars. Only letters, numbers and dashes accepted."
+                    }
+
+            display = payload.get("DISPLAYCONTACT", {})
+            mail = display.get("MAILADDRESS", {})
+            if not any(mail.values()) and not display.get("EMAIL1"):
+                payload.pop("DISPLAYCONTACT", None)
+            elif not any(mail.values()):
+                payload["DISPLAYCONTACT"] = {"EMAIL1": display.get("EMAIL1")}
+
+            return {"CUSTOMER": payload}
+        except Exception as e:
+            return {"error": e.__repr__()}
+
+    def upsert_record(self, record: dict, context: dict) -> None:
+        """Process the record."""
+        state_updates = dict()
+        if record.get("error"):
+            raise Exception(record["error"])
+        if record:
+            customer_recordno = record.get("CUSTOMER", {}).get("RECORDNO")
+            customer_id = record.get("CUSTOMER", {}).get("CUSTOMERID")
+            if customer_recordno or (
+                customer_id
+                and IntacctSink.customers_by_id is not None
+                and customer_id in IntacctSink.customers_by_id
+            ):
+                action = "update"
+                state_updates["is_updated"] = True
+            else:
+                action = "create"
+            response = self.request_api("POST", request_data={action: record})
+            id = response["data"]["customer"]["RECORDNO"]
+            state_updates = self.get_record_url("CUSTOMER", id, state_updates)
+            return id, True, state_updates
+
+
 class APAdjustments(IntacctSink):
     """IntacctV3 target sink class."""
 
@@ -536,6 +614,162 @@ class Bills(IntacctSink):
                 except Exception as delete_error:
                     self.logger.error(f"Failed to delete attachments with SUPDOCID {supdoc_id}: {delete_error}")
             raise Exception(f"Failed to {action} bill: {e}")
+
+
+class Invoices(IntacctSink):
+    """IntacctV3 AR invoice sink."""
+
+    name = "Invoices"
+
+    def preprocess_record(self, record: dict, context: dict) -> dict:
+        try:
+            payload = {
+                "WHENDUE": record.get("dueDate"),
+                "BASECURR": record.get("currency"),
+                "WHENCREATED": record.get("createdAt", "").split("T")[0] if record.get("createdAt") else None,
+                "WHENPOSTED": record.get("issueDate"),
+                "DESCRIPTION": record.get("description"),
+                "INVOICEITEMS": {"INVOICEITEM": []},
+                "CUSTOMERID": record.get("customerId"),
+                "RECORDID": record.get("invoiceNumber"),
+                "LOCATIONID": record.get("locationId"),
+            }
+
+            customer_name = record.get("customerName")
+            if customer_name and not payload.get("CUSTOMERID"):
+                self.get_customers()
+                try:
+                    payload["CUSTOMERID"] = IntacctSink.customers[customer_name]
+                except KeyError:
+                    return {
+                        "error": f"ERROR: Customer {customer_name} does not exist. Did you mean any of these: {list(IntacctSink.customers.keys())}?"
+                    }
+
+            customer_number = record.get("customerNumber")
+            if not payload.get("CUSTOMERID") and customer_number:
+                self.get_customers()
+                if customer_number in IntacctSink.customers_by_id:
+                    payload["CUSTOMERID"] = customer_number
+                else:
+                    return {
+                        "error": f"ERROR: CUSTOMERID {customer_number} not found for this account."
+                    }
+
+            if not payload.get("CUSTOMERID"):
+                return {
+                    "error": f"Customer data couldn't be found by customerName: {customer_name} or customerNumber: {customer_number}. CUSTOMERID is required."
+                }
+
+            if payload.get("RECORDID"):
+                invalid_chars = r"[\"\'&<>#?]"
+                if re.search(invalid_chars, payload.get("RECORDID")):
+                    raise Exception(
+                        f"RECORDID '{payload.get('RECORDID')}' contains one or more invalid characters '&,<,>,#,?'."
+                    )
+
+                existing_invoice = self.get_records(
+                    "ARINVOICE",
+                    fields=["RECORDNO"],
+                    filter={
+                        "filter": {
+                            "and": {
+                                "equalto": [
+                                    {"field": "RECORDID", "value": payload.get("RECORDID")},
+                                    {"field": "CUSTOMERID", "value": payload.get("CUSTOMERID", "")},
+                                ]
+                            }
+                        }
+                    },
+                )
+                if existing_invoice:
+                    payload["RECORDNO"] = existing_invoice[0].get("RECORDNO")
+
+            locationname = record.get("location")
+            if locationname and not payload.get("LOCATIONID"):
+                self.get_locations()
+                try:
+                    payload["LOCATIONID"] = IntacctSink.locations[locationname]
+                except KeyError:
+                    return {
+                        "error": f"ERROR: Location '{locationname}' does not exist. Did you mean any of these: {list(IntacctSink.locations.keys())}?"
+                    }
+
+            lines = parse_objs(record.get("lineItems", "[]"))
+            for line in lines:
+                item = {
+                    "PROJECTID": line.get("projectId"),
+                    "TRX_AMOUNT": line.get("total", line.get("totalPrice", line.get("amount"))),
+                    "ENTRYDESCRIPTION": line.get("description"),
+                    "LOCATIONID": line.get("locationId") or payload.get("LOCATIONID"),
+                    "CLASSID": line.get("classId"),
+                    "ACCOUNTNO": line.get("accountNumber"),
+                    "ITEMID": line.get("itemNumber"),
+                }
+
+                class_name = line.get("className")
+                if class_name and not item.get("CLASSID"):
+                    self.get_classes()
+                    item["CLASSID"] = IntacctSink.classes.get(class_name)
+
+                product_name = line.get("productName")
+                if product_name and not item.get("ITEMID"):
+                    self.get_items()
+                    item["ITEMID"] = IntacctSink.items.get(product_name)
+
+                self.get_accounts()
+                account_id = line.get("accountId")
+                account_name = line.get("accountName")
+                account_number = line.get("accountNumber")
+
+                if account_id:
+                    item["ACCOUNTNO"] = self.get_account_no_by_account_id(account_id)
+
+                if not item.get("ACCOUNTNO") and account_number and account_number in IntacctSink.accounts.values():
+                    item["ACCOUNTNO"] = account_number
+
+                if not item.get("ACCOUNTNO") and account_name and account_name in IntacctSink.accounts:
+                    item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
+
+                if not item.get("ACCOUNTNO"):
+                    return {
+                        "error": f"ERROR: ACCOUNTNAME or ACCOUNTNO not found for this tenant in item {item}. Intacct requires an ACCOUNTNO associated with each line item"
+                    }
+
+                department = line.get("department")
+                department_name = line.get("departmentName")
+                if department or department_name:
+                    self.get_departments()
+                    item["DEPARTMENTID"] = IntacctSink.departments.get(department) or IntacctSink.departments.get(
+                        department_name
+                    )
+
+                payload["INVOICEITEMS"]["INVOICEITEM"].append(item)
+
+            payload = clean_convert(payload)
+            return {"payload": {"ARINVOICE": payload}}
+        except Exception as e:
+            return {"error": e.__repr__()}
+
+    def upsert_record(self, record: dict, context: dict) -> None:
+        """Process the record."""
+        state_updates = {}
+        if not record:
+            raise Exception("Received an empty record, skipping.")
+        if "error" in record:
+            raise Exception(f"Record error: {record['error']}")
+
+        payload = record["payload"]
+        record_id = payload.get("ARINVOICE", {}).get("RECORDID", "")
+        action = "update" if payload["ARINVOICE"].get("RECORDNO") else "create"
+        try:
+            response = self.request_api("POST", request_data={action: payload})
+            invoice_id = response["data"]["arinvoice"]["RECORDNO"]
+            state_updates = self.get_record_url("ARINVOICE", invoice_id, state_updates)
+            self.logger.info(f"Successfully {action}d invoice with RECORDNO {invoice_id}")
+            return invoice_id, True, state_updates
+        except Exception as e:
+            self.logger.error(f"Failed to {action} invoice with RECORDID {record_id}: {e}")
+            raise Exception(f"Failed to {action} invoice: {e}")
 
 
 class PurchaseInvoices(IntacctSink):
