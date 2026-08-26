@@ -562,6 +562,7 @@ class PurchaseInvoices(IntacctSink):
                 "DOCNUMBER": record.get("number"),
                 "DESCRIPTION": record.get("description"),
                 "RECORDNO": record.get("id"),
+                "INCLUSIVETAX": None,
             }
 
             if record.get("supplierId"):
@@ -721,9 +722,11 @@ class PurchaseInvoices(IntacctSink):
                         item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
                         
                     if not item.get("ACCOUNTNO"):
-                        return {
-                            "error": f"ERROR: ACCOUNTNAME or ACCOUNTNO not found for this tenant in item {item}. \n Intaccts Requires an ACCOUNTNO associated with each line item"
-                        }
+                        if not account_name:
+                            return {
+                                "error": f"ERROR: ACCOUNTNAME or ACCOUNTNO not found for this tenant in item {item}. \n Intaccts Requires an ACCOUNTNO associated with each line item"
+                            }
+                        self.logger.warning(f"ACCOUNTNO lookup failed for '{account_name}', falling back to ACCOUNTNAME")
 
                     # departmentid is optional
                     department_id = line.get("departmentId")
@@ -734,10 +737,9 @@ class PurchaseInvoices(IntacctSink):
                         dept_recordno = str(department_id)
                         department_id_value = IntacctSink.departments_recordno.get(dept_recordno)
                         if not department_id_value:
-                            return {
-                                "error": f"ERROR: Department with RECORDNO '{dept_recordno}' does not exist."
-                            }
-                        item["DEPARTMENTID"] = department_id_value
+                            self.logger.warning(f"Department with RECORDNO '{dept_recordno}' not found, skipping DEPARTMENTID")
+                        else:
+                            item["DEPARTMENTID"] = department_id_value
                     elif department or department_name:
                         self.get_departments()
                         item["DEPARTMENTID"] = IntacctSink.departments.get(
