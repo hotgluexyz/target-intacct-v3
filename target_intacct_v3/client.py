@@ -415,8 +415,8 @@ class IntacctSink(HotglueSink):
 
     def post_attachments(self, attachments, record_id):
 
-        supdoc_id = str(record_id).replace("-", "")[-20:]  # supdocid only allows 20 chars
-        supdoc_id = supdoc_id.strip()  # Supdoc ID cannot contain leading or trailing spaces.
+        supdoc_id = str(record_id).replace("-","")[-20:]  # supdocid only allows 20 chars
+        supdoc_id = supdoc_id.strip() #Supdoc ID cannot contain leading or trailing spaces.
         self.logger.info(f"Transforming record_id: {record_id} into supdoc_id: {supdoc_id}")
         # 1. check if supdoc exists and get existing attachments
         try:
