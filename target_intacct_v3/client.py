@@ -23,6 +23,7 @@ class IntacctSink(HotglueSink):
     accounts = None
     locations = None
     projects = None
+    projects_by_id = None
     classes = None
     departments = None
     departments_recordno = None
@@ -309,6 +310,9 @@ class IntacctSink(HotglueSink):
         if IntacctSink.projects is None:
             projects = self.get_records("PROJECT", ["PROJECTID", "NAME"])
             IntacctSink.projects = dictify(projects, "NAME", "PROJECTID")
+            # fallback: allow matching by PROJECTID (code) as well as NAME,
+            # since some tenants store the project code (e.g. "262-87040") in the source field
+            IntacctSink.projects_by_id = dictify(projects, "PROJECTID", "PROJECTID")
         return IntacctSink.projects
 
     def get_locations(self):
@@ -411,7 +415,8 @@ class IntacctSink(HotglueSink):
 
     def post_attachments(self, attachments, record_id):
 
-        supdoc_id = str(record_id).replace("-","")[-20:]  # supdocid only allows 20 chars
+        supdoc_id = str(record_id).replace("-", "")[-20:]  # supdocid only allows 20 chars
+        supdoc_id = supdoc_id.strip()  # Supdoc ID cannot contain leading or trailing spaces.
         self.logger.info(f"Transforming record_id: {record_id} into supdoc_id: {supdoc_id}")
         # 1. check if supdoc exists and get existing attachments
         try:
@@ -421,7 +426,6 @@ class IntacctSink(HotglueSink):
         except Exception as e:
             self.logger.error(f"Failed to check existing supdoc for record {supdoc_id}: {e.__repr__()}")
             return
-        
 
         # getting existing attachments
         existing_attachments = {"names": [], "content": []}
@@ -437,7 +441,8 @@ class IntacctSink(HotglueSink):
 
         # prepare attachments payload
         try:
-            att_payload = self.prepare_attachment_payload(attachments, supdoc_id, existing_attachments, folder_id=record_id)
+            att_payload = self.prepare_attachment_payload(attachments, supdoc_id, existing_attachments,
+                                                          folder_id=record_id)
         except Exception as e:
             self.logger.error(f"Failed to prepare attachment payload for record {record_id}: {e.__repr__()}")
             return
@@ -477,7 +482,8 @@ class IntacctSink(HotglueSink):
         account = self.request_api("POST", request_data={"query": {"object": "GLACCOUNT", "select": {"field": ["ACCOUNTNO", "RECORDNO"]}, "filter": {"equalto": {"field": "RECORDNO", "value": f"{account_id}"}}}})
         if account:
             return account.get("data", {}).get("GLACCOUNT", {}).get("ACCOUNTNO")
-        raise Exception(f"Account with account_id {account_id} not found.")
+        self.logger.warning(f"ACCOUNTNO lookup by ID '{account_id}' failed!")
+        return None
     
 
     def get_record_url(self, object, record_id, state_updates):
