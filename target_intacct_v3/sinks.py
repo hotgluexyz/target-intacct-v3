@@ -565,6 +565,7 @@ class PurchaseInvoices(IntacctSink):
                 "DOCNUMBER": record.get("number"),
                 "DESCRIPTION": record.get("description"),
                 "RECORDNO": record.get("id"),
+                "INCLUSIVETAX": None,
             }
 
             if record.get("supplierId"):
