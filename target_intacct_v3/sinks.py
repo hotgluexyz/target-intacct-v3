@@ -458,11 +458,11 @@ class Bills(IntacctSink):
                     except Exception:
                         self.logger.warning(f"ACCOUNTNO lookup by ID '{account_id}' failed, falling back to name lookup")
 
-                if not item.get("ACCOUNTNO"):
-                    if account_number and account_number in IntacctSink.accounts.values():
-                        item["ACCOUNTNO"] = account_number
-                    elif account_name and account_name in IntacctSink.accounts:
-                        item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
+                if not item.get("ACCOUNTNO") and account_number and account_number in IntacctSink.accounts.values():
+                    item["ACCOUNTNO"] = account_number
+
+                if not item.get("ACCOUNTNO") and account_name and account_name in IntacctSink.accounts:
+                    item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
 
                 if not item.get("ACCOUNTNO"):
                     return {
@@ -565,7 +565,6 @@ class PurchaseInvoices(IntacctSink):
                 "DOCNUMBER": record.get("number"),
                 "DESCRIPTION": record.get("description"),
                 "RECORDNO": record.get("id"),
-                "INCLUSIVETAX": None,
             }
 
             if record.get("supplierId"):
@@ -721,11 +720,11 @@ class PurchaseInvoices(IntacctSink):
                         except Exception:
                             self.logger.warning(f"ACCOUNTNO lookup by ID '{account_id}' failed, falling back to name lookup")
 
-                    if not item.get("ACCOUNTNO"):
-                        if account_number and account_number in IntacctSink.accounts.values():
-                            item["ACCOUNTNO"] = account_number
-                        elif account_name and account_name in IntacctSink.accounts:
-                            item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
+                    if not item.get("ACCOUNTNO") and account_number and account_number in IntacctSink.accounts.values():
+                        item["ACCOUNTNO"] = account_number
+
+                    if not item.get("ACCOUNTNO") and account_name and account_name in IntacctSink.accounts:
+                        item["ACCOUNTNO"] = IntacctSink.accounts.get(account_name)
 
                     if not item.get("ACCOUNTNO"):
                         if not account_name:
@@ -753,6 +752,11 @@ class PurchaseInvoices(IntacctSink):
                             department
                         ) or IntacctSink.departments.get(department_name)
 
+                    if department_id and not item.get("DEPARTMENTID"):
+                        return {
+                            "error": f"ERROR: Department with RECORDNO '{department_id}' does not exist."
+                        }
+
                     location_name = line.get("location")
                     if location_name and not item["LOCATIONID"]:
                         self.get_locations()
@@ -765,15 +769,16 @@ class PurchaseInvoices(IntacctSink):
                         item["LOCATIONID"] = payload["LOCATIONID"]
 
                     project_name = line.get("projectName")
-                    if project_name and not item["PROJECTID"]:
+                    project_id = line.get("projectId")
+                    if (project_name or project_id) and not item["PROJECTID"]:
                         self.get_projects()
-                        item["PROJECTID"] = (
-                            IntacctSink.projects.get(project_name)
-                            or IntacctSink.projects_by_id.get(project_name)
-                        )
+                        if project_name:
+                            item["PROJECTID"] = IntacctSink.projects.get(project_name)
+                        if not item["PROJECTID"] and project_id and str(project_id) in IntacctSink.projects.values():
+                            item["PROJECTID"] = str(project_id)
                         if not item["PROJECTID"]:
                             self.logger.warning(
-                                f"PROJECT '{project_name}' not found by NAME or PROJECTID — leaving PROJECTID empty"
+                                f"PROJECT '{project_name or project_id}' not found by NAME or PROJECTID — leaving PROJECTID empty"
                             )
 
                     item_name = line.get("productName")
