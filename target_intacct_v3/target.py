@@ -44,6 +44,10 @@ class TargetIntacctV3(TargetHotglue):
             "use_locations",
             th.BooleanType,
         ),
+        th.Property(
+            "document_sequencing_enabled",
+            th.BooleanType,
+        ),
     ).to_dict()
     SINK_TYPES = [Suppliers, APAdjustments, JournalEntries, Bills, PurchaseInvoices, BillPayment, PurchaseOrders]
 
