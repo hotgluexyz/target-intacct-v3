@@ -73,6 +73,7 @@ class Suppliers(IntacctSink):
                         return {
                             "error": f"Skipping vendor because VENDORID is either missing or has unsupported chars. Only letters, numbers and dashes accepted."
                         }
+            payload = clean_convert(payload)
             return {"VENDOR": payload}
         except Exception as e:
             return {"error": e.__repr__()}
