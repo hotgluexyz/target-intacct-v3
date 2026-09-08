@@ -1,0 +1,1 @@
+{"bookmarks": {"Bills": [{"success": false, "error": "Attachment 'invalid_name_no_extension' must contain a file extension.", "externalId": "EXT-TEST-BILL-1105"}]}, "summary": {"Bills": {"success": 0, "fail": 1, "existing": 0, "updated": 0}}}

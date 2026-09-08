@@ -1,0 +1,1 @@
+{"bookmarks": {"Items": [{"id": "107", "externalId": "EXT-TEST-ITEM-1100", "success": true}, {"id": "108", "externalId": "EXT-TEST-ITEM-1103", "success": true}, {"id": "109", "externalId": "EXT-TEST-ITEM-1101", "success": true}, {"id": "110", "externalId": "EXT-TEST-ITEM-1102", "success": true}]}, "summary": {"Items": {"success": 0, "fail": 0, "existing": 0, "updated": 4}}}

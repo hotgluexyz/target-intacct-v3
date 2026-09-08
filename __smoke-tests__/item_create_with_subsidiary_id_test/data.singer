@@ -1,0 +1,4 @@
+{ "type": "SCHEMA", "stream": "Items", "schema": { "properties": { "id": { "type": [ "string", "null" ] }, "externalId": { "type": [ "string", "null" ] }, "itemNumber": { "type": [ "string", "null" ] }, "displayName": { "type": [ "string", "null" ] }, "type": { "type": [ "string", "null" ] }, "subsidiaryId": { "type": [ "string", "null" ] }, "subsidiaryName": { "type": [ "string", "null" ] }, "isActive": { "type": [ "boolean", "null" ] } }, "type": "object" }, "key_properties": []}
+{ "type": "RECORD", "stream": "Items", "record": { "externalId": "EXT-TEST-ITEM-1150", "displayName": "V-TEST Item 1150", "itemNumber": "V-TEST-Item-1150", "type": "Inventory", "isActive": true, "subsidiaryId": "1" } }
+{ "type": "RECORD", "stream": "Items", "record": { "externalId": "EXT-TEST-ITEM-1151", "displayName": "V-TEST Item 1151", "itemNumber": "V-TEST-Item-1151", "type": "Non-Inventory (Purchase only)", "isActive": true, "subsidiaryId": "2" } }
+{ "type": "STATE", "value": {}}

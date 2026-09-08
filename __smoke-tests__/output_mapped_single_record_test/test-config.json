@@ -1,0 +1,6 @@
+{
+  "freeze_time": "2025-09-29 00:00:00",
+  "env": {
+    "OUTPUT_MAPPED_RECORD": "true"
+  }
+}

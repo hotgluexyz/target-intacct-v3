@@ -1,0 +1,1403 @@
+interactions:
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><login><userid>USER_ID</userid><companyid>hotglueMPP-DEV</companyid><password>PASSWORD</password></login></authentication><content><function
+      controlid="1759104000.0"><getAPISession></getAPISession></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '546'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:50:59+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:50:59+00:00</sessiontimeout></authentication><result><status>success</status><function>getAPISession</function><controlid>1759104000.0</controlid><data><api><sessionid>Ev9wh7RTSho2X8DywcbSubvnGjebIRL-XVFR5Pc-Nl-A8sHG0qn_olY2</sessionid><endpoint>https://api.intacct.com/ia/xml/xmlgw.phtml</endpoint><locationid></locationid></api></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c4390ec3f243-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:50:59 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:50:59 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=sQl5hTUzr0mczgECzko93egwE4onm4aefn.B3cFtc1g-1761249059-1.0.1.1-THdV2e_fnrUatjDT_D87a1VAaCsQpSJsi9.0OgmL7akISMOSr3cws8QsQlghaLpYMTxLfZCFUBwUQy20s0SCsF6c0sqeJ3hmW9o16DwofTc;
+        path=/; expires=Thu, 23-Oct-25 20:20:59 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '553'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '806'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>GLACCOUNT</object><select><field>RECORDNO</field><field>ACCOUNTNO</field><field>TITLE</field><field>MEGAENTITYID</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '726'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: "<?xml version=\"1.0\" encoding=\"UTF-8\"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:00+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:00+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype=\"GLACCOUNT\" totalcount=\"135\" offset=\"0\" count=\"135\" numremaining=\"0\"><GLACCOUNT><RECORDNO>88</RECORDNO><ACCOUNTNO>10020</ACCOUNTNO><TITLE>Checking
+        2</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>200</RECORDNO><ACCOUNTNO>20670</ACCOUNTNO><TITLE>Actual
+        Landed Costs</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>201</RECORDNO><ACCOUNTNO>13200</ACCOUNTNO><TITLE>Inventory-Kits</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>202</RECORDNO><ACCOUNTNO>13300</ACCOUNTNO><TITLE>Goods
+        in Transit</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>57</RECORDNO><ACCOUNTNO>51705</ACCOUNTNO><TITLE>COGS-G&amp;A
+        on Projects</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>58</RECORDNO><ACCOUNTNO>51706</ACCOUNTNO><TITLE>COGS-Indirect
+        projects Costs Offset</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>59</RECORDNO><ACCOUNTNO>51707</ACCOUNTNO><TITLE>COGS-Reimbursed
+        Expenses</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>60</RECORDNO><ACCOUNTNO>51708</ACCOUNTNO><TITLE>COGS-Billable
+        Hours</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>61</RECORDNO><ACCOUNTNO>51709</ACCOUNTNO><TITLE>COGS-Non-Billable
+        Hours</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>29</RECORDNO><ACCOUNTNO>51711</ACCOUNTNO><TITLE>Labor
+        Cost Variance</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>28</RECORDNO><ACCOUNTNO>51710</ACCOUNTNO><TITLE>Labor
+        Cost Offset</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>33</RECORDNO><ACCOUNTNO>51702</ACCOUNTNO><TITLE>COGS-Non-Billable
+        Hours</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>55</RECORDNO><ACCOUNTNO>51703</ACCOUNTNO><TITLE>COGS-Burden
+        on Projects</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>56</RECORDNO><ACCOUNTNO>51704</ACCOUNTNO><TITLE>COGS-Overhead
+        on Projects</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>204</RECORDNO><ACCOUNTNO>60150</ACCOUNTNO><TITLE>Spot
+        Bonus</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>196</RECORDNO><ACCOUNTNO>40900</ACCOUNTNO><TITLE>Revenue
+        - Other</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>179</RECORDNO><ACCOUNTNO>60510</ACCOUNTNO><TITLE>Trade
+        Shows and Exhibits</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>174</RECORDNO><ACCOUNTNO>60320</ACCOUNTNO><TITLE>Repairs
+        and Maintenance</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>172</RECORDNO><ACCOUNTNO>60300</ACCOUNTNO><TITLE>Rent</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>34</RECORDNO><ACCOUNTNO>20701</ACCOUNTNO><TITLE>Deferred
+        Revenue</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>3</RECORDNO><ACCOUNTNO>20100</ACCOUNTNO><TITLE>Accounts
+        Payable</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>6</RECORDNO><ACCOUNTNO>12600</ACCOUNTNO><TITLE>Accounts
+        Receivable - Other</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>153</RECORDNO><ACCOUNTNO>16200</ACCOUNTNO><TITLE>Patents
+        &amp; Licenses</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>150</RECORDNO><ACCOUNTNO>15500</ACCOUNTNO><TITLE>Furniture
+        &amp; Fixtures</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>151</RECORDNO><ACCOUNTNO>15510</ACCOUNTNO><TITLE>Accm.Depr.
+        Furniture &amp; Fixtures</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>152</RECORDNO><ACCOUNTNO>16100</ACCOUNTNO><TITLE>Goodwill</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>154</RECORDNO><ACCOUNTNO>16300</ACCOUNTNO><TITLE>Capitalized\_Software\_Costs</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>194</RECORDNO><ACCOUNTNO>20400</ACCOUNTNO><TITLE>Salaries
+        Payable</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>193</RECORDNO><ACCOUNTNO>40300</ACCOUNTNO><TITLE>Revenue
+        - Accessories</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>83</RECORDNO><ACCOUNTNO>20900-300</ACCOUNTNO><TITLE>Due
+        to Entity 300</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>209</RECORDNO><ACCOUNTNO>70600</ACCOUNTNO><TITLE>Elimination
+        Adjustments</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>161</RECORDNO><ACCOUNTNO>30300</ACCOUNTNO><TITLE>Accumulated
+        OCI</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>162</RECORDNO><ACCOUNTNO>50100</ACCOUNTNO><TITLE>COGS
+        Sales</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>163</RECORDNO><ACCOUNTNO>50200</ACCOUNTNO><TITLE>COGS-Damage,
+        Scrap, Spoilage</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>164</RECORDNO><ACCOUNTNO>50300</ACCOUNTNO><TITLE>COGS
+        Services</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>165</RECORDNO><ACCOUNTNO>60100</ACCOUNTNO><TITLE>Salaries
+        and Wages</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>212</RECORDNO><ACCOUNTNO>20605</ACCOUNTNO><TITLE>Salaries
+        Payable</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>85</RECORDNO><ACCOUNTNO>60660</ACCOUNTNO><TITLE>Other
+        G&amp;A</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>175</RECORDNO><ACCOUNTNO>60330</ACCOUNTNO><TITLE>Insurance</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>176</RECORDNO><ACCOUNTNO>60340</ACCOUNTNO><TITLE>Office
+        Supplies</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>177</RECORDNO><ACCOUNTNO>60400</ACCOUNTNO><TITLE>Software
+        and Licenses</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>178</RECORDNO><ACCOUNTNO>60500</ACCOUNTNO><TITLE>Marketing
+        and Advertising</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>63</RECORDNO><ACCOUNTNO>20610</ACCOUNTNO><TITLE>Accrued
+        Sales Tax Payable</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>35</RECORDNO><ACCOUNTNO>20702</ACCOUNTNO><TITLE>Deferred
+        Revenue Contra</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>192</RECORDNO><ACCOUNTNO>40200</ACCOUNTNO><TITLE>Revenue
+        - Entry</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>191</RECORDNO><ACCOUNTNO>40100</ACCOUNTNO><TITLE>Revenue
+        - Surveillance</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>132</RECORDNO><ACCOUNTNO>10100</ACCOUNTNO><TITLE>Cash</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>133</RECORDNO><ACCOUNTNO>10200</ACCOUNTNO><TITLE>Cash
+        Equivalents</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>134</RECORDNO><ACCOUNTNO>10400</ACCOUNTNO><TITLE>Investments
+        and Securities</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>64</RECORDNO><ACCOUNTNO>12900</ACCOUNTNO><TITLE>Intercompany
+        Receivables</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>67</RECORDNO><ACCOUNTNO>50900</ACCOUNTNO><TITLE>COGS-Other</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>68</RECORDNO><ACCOUNTNO>13900</ACCOUNTNO><TITLE>Inventory-Other</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>65</RECORDNO><ACCOUNTNO>20900</ACCOUNTNO><TITLE>Intercompany
+        Payables</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>203</RECORDNO><ACCOUNTNO>20680</ACCOUNTNO><TITLE>Goods
+        Received Not Invoiced (GRNI)</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>173</RECORDNO><ACCOUNTNO>60310</ACCOUNTNO><TITLE>Utilities</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>199</RECORDNO><ACCOUNTNO>20660</ACCOUNTNO><TITLE>Estimated
+        Landed Costs</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>135</RECORDNO><ACCOUNTNO>12200</ACCOUNTNO><TITLE>Allowance
+        For Doubtful Accounts</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>136</RECORDNO><ACCOUNTNO>12710</ACCOUNTNO><TITLE>AR-Retainage</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>89</RECORDNO><ACCOUNTNO>10030</ACCOUNTNO><TITLE>Checking
+        3</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>22</RECORDNO><ACCOUNTNO>20300</ACCOUNTNO><TITLE>Accounts
+        Payable - Employees</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>2</RECORDNO><ACCOUNTNO>12100</ACCOUNTNO><TITLE>Accounts
+        Receivable</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>1</RECORDNO><ACCOUNTNO>35000</ACCOUNTNO><TITLE>Retained
+        Earnings</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>79</RECORDNO><ACCOUNTNO>12900-200</ACCOUNTNO><TITLE>Due
+        from Entity 200</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>80</RECORDNO><ACCOUNTNO>12900-300</ACCOUNTNO><TITLE>Due
+        from Entity 300</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>76</RECORDNO><ACCOUNTNO>12500</ACCOUNTNO><TITLE>Employee
+        Advances</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>146</RECORDNO><ACCOUNTNO>15100</ACCOUNTNO><TITLE>Buildings</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>147</RECORDNO><ACCOUNTNO>15110</ACCOUNTNO><TITLE>Buildings
+        Accm.Depr.</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>148</RECORDNO><ACCOUNTNO>15200</ACCOUNTNO><TITLE>Machinery
+        &amp; Equipment</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>149</RECORDNO><ACCOUNTNO>15210</ACCOUNTNO><TITLE>Machinery
+        &amp; Equipment Accm.Depr.</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>207</RECORDNO><ACCOUNTNO>60220</ACCOUNTNO><TITLE>Telecommunication
+        Expense</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>81</RECORDNO><ACCOUNTNO>20900-100</ACCOUNTNO><TITLE>Due
+        to Entity 100</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>208</RECORDNO><ACCOUNTNO>20500</ACCOUNTNO><TITLE>Credit
+        Card Offset</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>77</RECORDNO><ACCOUNTNO>12900-100</ACCOUNTNO><TITLE>Due
+        from Entity 100</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>82</RECORDNO><ACCOUNTNO>20900-200</ACCOUNTNO><TITLE>Due
+        to Entity 200</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>217</RECORDNO><ACCOUNTNO>10300</ACCOUNTNO><TITLE>Undeposited
+        Cash Funds</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>218</RECORDNO><ACCOUNTNO>15610</ACCOUNTNO><TITLE>Buildings-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>219</RECORDNO><ACCOUNTNO>15615</ACCOUNTNO><TITLE>Buildings
+        Accumulated Depreciation-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>220</RECORDNO><ACCOUNTNO>15620</ACCOUNTNO><TITLE>Land-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>221</RECORDNO><ACCOUNTNO>15625</ACCOUNTNO><TITLE>Land
+        Accumulated Depreciation-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>222</RECORDNO><ACCOUNTNO>15630</ACCOUNTNO><TITLE>Vehicles-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>223</RECORDNO><ACCOUNTNO>15635</ACCOUNTNO><TITLE>Vehicles
+        Accumulated Depreciation-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>224</RECORDNO><ACCOUNTNO>15640</ACCOUNTNO><TITLE>Machinery
+        &amp; Equipment-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>225</RECORDNO><ACCOUNTNO>15645</ACCOUNTNO><TITLE>Machinery
+        &amp; Equipment Accumulated Depreciation-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>226</RECORDNO><ACCOUNTNO>15650</ACCOUNTNO><TITLE>Furniture
+        and Fixtures-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>227</RECORDNO><ACCOUNTNO>15655</ACCOUNTNO><TITLE>Furniture
+        and Fixtures Accumulated Depreciation-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>228</RECORDNO><ACCOUNTNO>15660</ACCOUNTNO><TITLE>Computer
+        Equipment-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>229</RECORDNO><ACCOUNTNO>15665</ACCOUNTNO><TITLE>Computer
+        Equipment Accumulated Depreciation-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>230</RECORDNO><ACCOUNTNO>40800</ACCOUNTNO><TITLE>Gain
+        (Loss) Fixed Assets-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>231</RECORDNO><ACCOUNTNO>60670</ACCOUNTNO><TITLE>Depreciation
+        Expense-SFAM</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>190</RECORDNO><ACCOUNTNO>80500</ACCOUNTNO><TITLE>Gain
+        for Sale of an asset</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>195</RECORDNO><ACCOUNTNO>70200</ACCOUNTNO><TITLE>Interest
+        Expense</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>206</RECORDNO><ACCOUNTNO>90000</ACCOUNTNO><TITLE>Allocations</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>210</RECORDNO><ACCOUNTNO>20800</ACCOUNTNO><TITLE>Other
+        Payables</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>181</RECORDNO><ACCOUNTNO>60610</ACCOUNTNO><TITLE>Excise
+        Tax</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>182</RECORDNO><ACCOUNTNO>60620</ACCOUNTNO><TITLE>Other
+        Taxes</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>183</RECORDNO><ACCOUNTNO>60630</ACCOUNTNO><TITLE>Depreciation
+        Expense</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>184</RECORDNO><ACCOUNTNO>60640</ACCOUNTNO><TITLE>Amortization\_Expense</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>137</RECORDNO><ACCOUNTNO>13100</ACCOUNTNO><TITLE>Inventory</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>143</RECORDNO><ACCOUNTNO>14100</ACCOUNTNO><TITLE>Prepaid
+        Insurance</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>144</RECORDNO><ACCOUNTNO>14200</ACCOUNTNO><TITLE>Prepaid
+        Rent</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>145</RECORDNO><ACCOUNTNO>14300</ACCOUNTNO><TITLE>Prepaid
+        Other</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>180</RECORDNO><ACCOUNTNO>60600</ACCOUNTNO><TITLE>Bank
+        Charges</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>186</RECORDNO><ACCOUNTNO>60700</ACCOUNTNO><TITLE>Company
+        Credit Card Offset</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>188</RECORDNO><ACCOUNTNO>80200</ACCOUNTNO><TITLE>Interest
+        Income</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>189</RECORDNO><ACCOUNTNO>80400</ACCOUNTNO><TITLE>Dividends</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>155</RECORDNO><ACCOUNTNO>16900</ACCOUNTNO><TITLE>Other
+        Intangible Assets\_</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>156</RECORDNO><ACCOUNTNO>17000</ACCOUNTNO><TITLE>Other
+        Assets</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>157</RECORDNO><ACCOUNTNO>20200</ACCOUNTNO><TITLE>Notes
+        Payable</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>215</RECORDNO><ACCOUNTNO>60420</ACCOUNTNO><TITLE>Dues
+        &amp; Subscriptions</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>158</RECORDNO><ACCOUNTNO>20650</ACCOUNTNO><TITLE>Accrued
+        Payroll Tax Payable</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>159</RECORDNO><ACCOUNTNO>30100</ACCOUNTNO><TITLE>Common
+        Stock</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>160</RECORDNO><ACCOUNTNO>30200</ACCOUNTNO><TITLE>Preferred
+        Stock</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>86</RECORDNO><ACCOUNTNO>40400</ACCOUNTNO><TITLE>Intercompany
+        Professional Fees</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>84</RECORDNO><ACCOUNTNO>10010</ACCOUNTNO><TITLE>Checking
+        1</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>5</RECORDNO><ACCOUNTNO>80100</ACCOUNTNO><TITLE>Other
+        Income</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>87</RECORDNO><ACCOUNTNO>60410</ACCOUNTNO><TITLE>Professional
+        Fees Expense</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>213</RECORDNO><ACCOUNTNO>70101</ACCOUNTNO><TITLE>Employee
+        Expense Clearing Account</TITLE><MEGAENTITYID>100</MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>166</RECORDNO><ACCOUNTNO>60110</ACCOUNTNO><TITLE>Employee
+        Benefits</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>167</RECORDNO><ACCOUNTNO>60120</ACCOUNTNO><TITLE>Commission</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>168</RECORDNO><ACCOUNTNO>60130</ACCOUNTNO><TITLE>Payroll
+        Taxes</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>169</RECORDNO><ACCOUNTNO>60140</ACCOUNTNO><TITLE>Employee
+        Deductions</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>170</RECORDNO><ACCOUNTNO>60200</ACCOUNTNO><TITLE>Travel</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>171</RECORDNO><ACCOUNTNO>60210</ACCOUNTNO><TITLE>Meals
+        and Entertainment</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>4</RECORDNO><ACCOUNTNO>70100</ACCOUNTNO><TITLE>Other
+        Expense</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>32</RECORDNO><ACCOUNTNO>51701</ACCOUNTNO><TITLE>COGS-Billable
+        Hours</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>185</RECORDNO><ACCOUNTNO>60650</ACCOUNTNO><TITLE>Bad
+        Debt Expense</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>240</RECORDNO><ACCOUNTNO>78678</ACCOUNTNO><TITLE>BK_TEST</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>241</RECORDNO><ACCOUNTNO>70400</ACCOUNTNO><TITLE>Journal
+        Entry Rounding</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>242</RECORDNO><ACCOUNTNO>70500</ACCOUNTNO><TITLE>Currency
+        Gain/Loss</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>235</RECORDNO><ACCOUNTNO>23456</ACCOUNTNO><TITLE>Azmat
+        Top Level</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>236</RECORDNO><ACCOUNTNO>34567</ACCOUNTNO><TITLE>Azmat
+        USA2</TITLE><MEGAENTITYID>200</MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>234</RECORDNO><ACCOUNTNO>12345</ACCOUNTNO><TITLE>Azmat
+        Test</TITLE><MEGAENTITYID>100</MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>237</RECORDNO><ACCOUNTNO>12346</ACCOUNTNO><TITLE>Azmat
+        USA3</TITLE><MEGAENTITYID>300</MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>238</RECORDNO><ACCOUNTNO>12347</ACCOUNTNO><TITLE>Azmat
+        Canada</TITLE><MEGAENTITYID>500</MEGAENTITYID></GLACCOUNT><GLACCOUNT><RECORDNO>232</RECORDNO><ACCOUNTNO>10837</ACCOUNTNO><TITLE>Savings</TITLE><MEGAENTITYID></MEGAENTITYID></GLACCOUNT></data></result></operation></response>"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c43dfa37f1df-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:00 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:50:59 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=EkR3HF4_Kse4zQyxC6OTZFBLO5Qt08_BrLbF1vLyhxw-1761249060-1.0.1.1-ncYH.M2q2cGPu7BF1OZRGFidneLaTcYCuCqxCX4hmnS174Bwxh1moiXuoPl8deN7ne65HUw8N5J9sx50opAalV0Y1RtEzSM6PJ3VA2qGsRA;
+        path=/; expires=Thu, 23-Oct-25 20:21:00 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '519'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.02'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '19369'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>LOCATIONENTITY</object><select><field>RECORDNO</field><field>LOCATIONID</field><field>NAME</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '704'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:00+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:00+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="LOCATIONENTITY" totalcount="9" offset="0" count="9" numremaining="0"><LOCATIONENTITY><RECORDNO>1</RECORDNO><LOCATIONID>100</LOCATIONID><NAME>USA1</NAME></LOCATIONENTITY><LOCATIONENTITY><RECORDNO>2</RECORDNO><LOCATIONID>200</LOCATIONID><NAME>USA2</NAME></LOCATIONENTITY><LOCATIONENTITY><RECORDNO>3</RECORDNO><LOCATIONID>300</LOCATIONID><NAME>USA3</NAME></LOCATIONENTITY><LOCATIONENTITY><RECORDNO>9</RECORDNO><LOCATIONID>500</LOCATIONID><NAME>Canada</NAME></LOCATIONENTITY><LOCATIONENTITY><RECORDNO>10</RECORDNO><LOCATIONID>600</LOCATIONID><NAME>UK</NAME></LOCATIONENTITY><LOCATIONENTITY><RECORDNO>12</RECORDNO><LOCATIONID>AFG</LOCATIONID><NAME>Afghanistan</NAME></LOCATIONENTITY><LOCATIONENTITY><RECORDNO>13</RECORDNO><LOCATIONID>CADCOM</LOCATIONID><NAME>Canadian
+        Exports</NAME></LOCATIONENTITY><LOCATIONENTITY><RECORDNO>16</RECORDNO><LOCATIONID>7867786</LOCATIONID><NAME>BK-TEST-RT</NAME></LOCATIONENTITY><LOCATIONENTITY><RECORDNO>8</RECORDNO><LOCATIONID>900</LOCATIONID><NAME>Elimination
+        All</NAME></LOCATIONENTITY></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c442faa38060-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:00 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:00 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=YQesc_373w10vU1o52OzfFnZVRTWDwrdsxAGAAMqrmo-1761249060-1.0.1.1-hMqZEORIZJm.hTWrfnSbaOECOyXxV7E7VEZam5PGJB9Y4NQ.1x4_Hqcd76Nw3c7wp7_iAu.5OIWra2BU3KyGkk6pWtj9G7MLHySwsP7yOrU;
+        path=/; expires=Thu, 23-Oct-25 20:21:00 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '506'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.02'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '1646'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>CLASS</object><select><field>RECORDNO</field><field>CLASSID</field><field>NAME</field><field>MEGAENTITYID</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '719'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:01+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:01+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="CLASS" totalcount="11" offset="0" count="11" numremaining="0"><CLASS><RECORDNO>3</RECORDNO><CLASSID>300</CLASSID><NAME>Retail</NAME><MEGAENTITYID></MEGAENTITYID></CLASS><CLASS><RECORDNO>2</RECORDNO><CLASSID>200</CLASSID><NAME>Commercial</NAME><MEGAENTITYID></MEGAENTITYID></CLASS><CLASS><RECORDNO>1</RECORDNO><CLASSID>100</CLASSID><NAME>Residential</NAME><MEGAENTITYID></MEGAENTITYID></CLASS><CLASS><RECORDNO>5</RECORDNO><CLASSID>500</CLASSID><NAME>AZ-Child</NAME><MEGAENTITYID></MEGAENTITYID></CLASS><CLASS><RECORDNO>4</RECORDNO><CLASSID>400</CLASSID><NAME>AZ-TEST</NAME><MEGAENTITYID></MEGAENTITYID></CLASS><CLASS><RECORDNO>6</RECORDNO><CLASSID>600</CLASSID><NAME>AZ-Grand
+        Child</NAME><MEGAENTITYID></MEGAENTITYID></CLASS><CLASS><RECORDNO>7</RECORDNO><CLASSID>700</CLASSID><NAME>AZ
+        - Class In USA 1</NAME><MEGAENTITYID>100</MEGAENTITYID></CLASS><CLASS><RECORDNO>8</RECORDNO><CLASSID>786786</CLASSID><NAME>BK-Class-RT</NAME><MEGAENTITYID></MEGAENTITYID></CLASS><CLASS><RECORDNO>9</RECORDNO><CLASSID>1786786</CLASSID><NAME>BK-Child</NAME><MEGAENTITYID></MEGAENTITYID></CLASS><CLASS><RECORDNO>10</RECORDNO><CLASSID>2786786</CLASSID><NAME>BK-Grandchild</NAME><MEGAENTITYID></MEGAENTITYID></CLASS><CLASS><RECORDNO>11</RECORDNO><CLASSID>3786786</CLASSID><NAME>BK-GreatGrand-Child</NAME><MEGAENTITYID></MEGAENTITYID></CLASS></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c4486ae7f187-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:02 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:01 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=9hwqkFhQG1Mi6hfExrKyu6rJLSZXXo9WwBb_kOxiQew-1761249062-1.0.1.1-aaqoKgfpcen0C67ZcrYZpNkJkLaILmef2A3WsFR7hjMJWboT.MuoUJnXEk8ch2ZtxPHmJGVQlbLt84Rp3HGrVfG1DmxiF5TtceZ5XsZciWk;
+        path=/; expires=Thu, 23-Oct-25 20:21:02 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '628'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '1949'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>DEPARTMENT</object><select><field>RECORDNO</field><field>DEPARTMENTID</field><field>TITLE</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '703'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:02+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:02+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="DEPARTMENT" totalcount="10" offset="0" count="10" numremaining="0"><DEPARTMENT><RECORDNO>1</RECORDNO><DEPARTMENTID>100</DEPARTMENTID><TITLE>Sales</TITLE></DEPARTMENT><DEPARTMENT><RECORDNO>2</RECORDNO><DEPARTMENTID>200</DEPARTMENTID><TITLE>Operations</TITLE></DEPARTMENT><DEPARTMENT><RECORDNO>3</RECORDNO><DEPARTMENTID>300</DEPARTMENTID><TITLE>Admin</TITLE></DEPARTMENT><DEPARTMENT><RECORDNO>4</RECORDNO><DEPARTMENTID>400</DEPARTMENTID><TITLE>Marketing</TITLE></DEPARTMENT><DEPARTMENT><RECORDNO>5</RECORDNO><DEPARTMENTID>500</DEPARTMENTID><TITLE>IT</TITLE></DEPARTMENT><DEPARTMENT><RECORDNO>8</RECORDNO><DEPARTMENTID>700</DEPARTMENTID><TITLE>Test
+        Grand Child Dept.</TITLE></DEPARTMENT><DEPARTMENT><RECORDNO>7</RECORDNO><DEPARTMENTID>600</DEPARTMENTID><TITLE>Test
+        Dept.</TITLE></DEPARTMENT><DEPARTMENT><RECORDNO>9</RECORDNO><DEPARTMENTID>786786</DEPARTMENTID><TITLE>BK_DEPT</TITLE></DEPARTMENT><DEPARTMENT><RECORDNO>10</RECORDNO><DEPARTMENTID>2786786</DEPARTMENTID><TITLE>BK-DEPT-CHILD_RT</TITLE></DEPARTMENT><DEPARTMENT><RECORDNO>6</RECORDNO><DEPARTMENTID>29888</DEPARTMENTID><TITLE>Department
+        1</TITLE></DEPARTMENT></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c44f4fe3f23f-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:02 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:02 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=nuqEcXnFQuieuzoIu3.CRPoMdPlBEDzXlB50h3jUNlk-1761249062-1.0.1.1-ANR9l48bh_TqYO6Ws0EmMqQlpq8tbgOrylnYTu59hWfwcG0I0PeuD3OAzLIsBtyL4QDSMVETD3Mfkh.SexlrNGYJQ0yoMdxHh0A_X_GZ79Q;
+        path=/; expires=Thu, 23-Oct-25 20:21:02 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '514'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.02'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '1745'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>PROJECT</object><select><field>RECORDNO</field><field>PROJECTID</field><field>NAME</field><field>MEGAENTITYID</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '723'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:03+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:03+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="PROJECT" totalcount="6" offset="0" count="6" numremaining="0"><PROJECT><RECORDNO>13</RECORDNO><PROJECTID>1003</PROJECTID><NAME>Internal
+        Audit</NAME><MEGAENTITYID>100</MEGAENTITYID></PROJECT><PROJECT><RECORDNO>16</RECORDNO><PROJECTID>1010</PROJECTID><NAME>Internal
+        Audit</NAME><MEGAENTITYID></MEGAENTITYID></PROJECT><PROJECT><RECORDNO>14</RECORDNO><PROJECTID>1004</PROJECTID><NAME>Training</NAME><MEGAENTITYID>100</MEGAENTITYID></PROJECT><PROJECT><RECORDNO>15</RECORDNO><PROJECTID>1005</PROJECTID><NAME>User
+        Conference</NAME><MEGAENTITYID>100</MEGAENTITYID></PROJECT><PROJECT><RECORDNO>11</RECORDNO><PROJECTID>1001</PROJECTID><NAME>Server
+        Upgrade</NAME><MEGAENTITYID>100</MEGAENTITYID></PROJECT><PROJECT><RECORDNO>12</RECORDNO><PROJECTID>1002</PROJECTID><NAME>Equipment
+        Upgrade</NAME><MEGAENTITYID>100</MEGAENTITYID></PROJECT></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c45409c4248c-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:03 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:03 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=XmPRZEw.5CcKvI2X0KQ1QURHW1yMKGJYnNQSzBl5guw-1761249063-1.0.1.1-JdYsfHUmPchwMQglBxBfsVQGs5CYgqERR6lm.HxbuN85GI94zLENLPMqq29QHKLP9VXLq.BLF4kc4ecRnaP4wGr14kOnp479F7PIYVAziQc;
+        path=/; expires=Thu, 23-Oct-25 20:21:03 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '604'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '1455'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>LOCATION</object><select><field>RECORDNO</field><field>LOCATIONID</field><field>NAME</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '698'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:04+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:04+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="LOCATION" totalcount="16" offset="0" count="16" numremaining="0"><LOCATION><RECORDNO>12</RECORDNO><LOCATIONID>AFG</LOCATIONID><NAME>Afghanistan</NAME></LOCATION><LOCATION><RECORDNO>1</RECORDNO><LOCATIONID>100</LOCATIONID><NAME>USA1</NAME></LOCATION><LOCATION><RECORDNO>2</RECORDNO><LOCATIONID>200</LOCATIONID><NAME>USA2</NAME></LOCATION><LOCATION><RECORDNO>3</RECORDNO><LOCATIONID>300</LOCATIONID><NAME>USA3</NAME></LOCATION><LOCATION><RECORDNO>9</RECORDNO><LOCATIONID>500</LOCATIONID><NAME>Canada</NAME></LOCATION><LOCATION><RECORDNO>4</RECORDNO><LOCATIONID>110</LOCATIONID><NAME>New
+        York</NAME></LOCATION><LOCATION><RECORDNO>5</RECORDNO><LOCATIONID>120</LOCATIONID><NAME>Boston</NAME></LOCATION><LOCATION><RECORDNO>6</RECORDNO><LOCATIONID>210</LOCATIONID><NAME>Dallas</NAME></LOCATION><LOCATION><RECORDNO>7</RECORDNO><LOCATIONID>220</LOCATIONID><NAME>San
+        Francisco</NAME></LOCATION><LOCATION><RECORDNO>8</RECORDNO><LOCATIONID>900</LOCATIONID><NAME>Elimination
+        All</NAME></LOCATION><LOCATION><RECORDNO>15</RECORDNO><LOCATIONID>1786786</LOCATIONID><NAME>BK-Test-Location-2-RT</NAME></LOCATION><LOCATION><RECORDNO>13</RECORDNO><LOCATIONID>CADCOM</LOCATIONID><NAME>Canadian
+        Exports</NAME></LOCATION><LOCATION><RECORDNO>14</RECORDNO><LOCATIONID>786786</LOCATIONID><NAME>BK-Test-Location-RT</NAME></LOCATION><LOCATION><RECORDNO>16</RECORDNO><LOCATIONID>7867786</LOCATIONID><NAME>BK-TEST-RT</NAME></LOCATION><LOCATION><RECORDNO>11</RECORDNO><LOCATIONID>101</LOCATIONID><NAME>AZ
+        - Test Location</NAME></LOCATION><LOCATION><RECORDNO>10</RECORDNO><LOCATIONID>600</LOCATIONID><NAME>UK</NAME></LOCATION></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c4597b15ae87-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:04 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:04 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=YTZrytsnz.JtfSRkByzOBz4pO77fH6Gi4Rtxa_oxImI-1761249064-1.0.1.1-RpXxDedeb2maHc_KpzPrA8.BbeWlZe8_XcwRImk3eMKGcKkAk_yuvTQza9pU_noa3NxpkeXkakZD.5qvTBB2XsYwpMif2eGET.Eb_aN25A8;
+        path=/; expires=Thu, 23-Oct-25 20:21:04 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '535'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '2223'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>CHECKINGACCOUNT</object><select><field>BANKACCOUNTNO</field><field>BANKACCOUNTID</field><field>MEGAENTITYID</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '721'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:05+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:05+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="CHECKINGACCOUNT" totalcount="3" offset="0" count="3" numremaining="0"><CHECKINGACCOUNT><BANKACCOUNTNO>442516879123</BANKACCOUNTNO><BANKACCOUNTID>100_SVB</BANKACCOUNTID><MEGAENTITYID></MEGAENTITYID></CHECKINGACCOUNT><CHECKINGACCOUNT><BANKACCOUNTNO>720704581552</BANKACCOUNTNO><BANKACCOUNTID>200_SVB</BANKACCOUNTID><MEGAENTITYID></MEGAENTITYID></CHECKINGACCOUNT><CHECKINGACCOUNT><BANKACCOUNTNO>695751035722</BANKACCOUNTNO><BANKACCOUNTID>300_SVB</BANKACCOUNTID><MEGAENTITYID></MEGAENTITYID></CHECKINGACCOUNT></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c45fe88500fa-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:05 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:05 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=h0Tvvjx9LNFjqo91d6olIHVBeIJkynm4cVol_b3lyPQ-1761249065-1.0.1.1-6IZMAvEb48IWH4o2XRr3LDon2bCuW26TonrHS.pSIPYq0btcLrTO8k6ZB7V5ubys15sOyaxHZWMr1tW8UF2bO2hjGW6w9ShVpOYmo6TTzWA;
+        path=/; expires=Thu, 23-Oct-25 20:21:05 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '485'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '1135'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>SAVINGSACCOUNT</object><select><field>RECORDNO</field><field>BANKACCOUNTID</field><field>MEGAENTITYID</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '715'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:06+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:06+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="SAVINGSACCOUNT" totalcount="1" offset="0" count="1" numremaining="0"><SAVINGSACCOUNT><RECORDNO>5</RECORDNO><BANKACCOUNTID>my-happy-account</BANKACCOUNTID><MEGAENTITYID></MEGAENTITYID></SAVINGSACCOUNT></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c4646cdef235-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:06 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:06 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=88JtwszBFXFgeyySxmOmDnsC9x1IQ8tLzE8Gm.za2Xs-1761249066-1.0.1.1-1hSgLWw6rXHW74yNIlVIgc73xOEUpsABm_ruKngpz.rs9Qu_2bSPQQfcjrxUVksDASZdhsmBg4nXVuAGxQxrAFtrrJH6GSsbyr68llWGi1A;
+        path=/; expires=Thu, 23-Oct-25 20:21:06 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '505'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '830'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>CREDITCARD</object><select><field>RECORDNO</field><field>CARDID</field><field>MEGAENTITYID</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '704'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:07+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:07+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="CREDITCARD" totalcount="1" offset="0" count="1" numremaining="0"><CREDITCARD><RECORDNO>3</RECORDNO><CARDID>AMEX</CARDID><MEGAENTITYID>100</MEGAENTITYID></CREDITCARD></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c46a78550308-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:07 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:07 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=PngB8ise_m5Q9mntQ8nwZBX.h0PcPapQgFiilgjCskY-1761249067-1.0.1.1-XVTH1bEPNqoIFW2UnCdW1Wxhy5Qw28_3VLK5EHU8e.f2DmZaM49pF2oSfyv3hzSLSDVzjlLni80mgwF.086G5QyeuiIwl47r948qp0zbb00;
+        path=/; expires=Thu, 23-Oct-25 20:21:07 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '464'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '795'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>APADJUSTMENT</object><select><field>RECORDNO</field><field>RECORDID</field><field>MEGAENTITYID</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset><filter><in><field>RECORDID</field><value>VC-TEST-2001</value></in></filter></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '784'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:08+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:08+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="APADJUSTMENT" totalcount="0" offset="0" count="0" numremaining="0"/></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c46f78f3aa89-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:08 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:08 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=AKhHcPyJyo4rLzmfFL9ZGZd3p5gH_Fm2czUAPbgPv3g-1761249068-1.0.1.1-6Ydy70eW.lMkAo8KugEC9B6AORFPerO28oX0VrRM63SN0GcfEZBObr2SkQvZ_Xc9cJ8wCyvQtXK7lPd81cFBJwaNPmjgPSdAfsi_AEnpBUY;
+        path=/; expires=Thu, 23-Oct-25 20:21:08 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '487'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.02'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '691'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>VENDOR</object><select><field>RECORDNO</field><field>NAME</field><field>VENDORID</field><field>MEGAENTITYID</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset><filter><in><field>VENDORID</field><value>20007</value></in></filter></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '790'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:08+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:08+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="VENDOR" totalcount="1" offset="0" count="1" numremaining="0"><VENDOR><RECORDNO>55</RECORDNO><NAME>Lenovo</NAME><VENDORID>20007</VENDORID><MEGAENTITYID></MEGAENTITYID></VENDOR></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c4758e82fbee-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:09 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:08 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=Rtubz8fCYoJ1s7L4OtJbiCWTAwzFxoLjnp0ve4qvRJk-1761249069-1.0.1.1-pyPkmEtqtKpc2Um3aBtrX25fwSVaarJ.7_wVGOVyuSd6o.McvWAIRbTsHy5W_fk3bURMmHz_99I3aAAYZTmj1PKukxsD.ixXJqNGb.TnBBM;
+        path=/; expires=Thu, 23-Oct-25 20:21:09 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '774'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '805'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="1759104000.0"><query><object>ITEM</object><select><field>RECORDNO</field><field>ITEMID</field><field>NAME</field><field>MEGAENTITYID</field></select><options><showprivate>true</showprivate></options><pagesize>1000</pagesize><offset>0</offset><filter><or><in><field>RECORDNO</field><value>50</value></in><in><field>NAME</field><value>ICU
+      Entry System</value></in><in><field>ITEMID</field><value>CSS1001</value></in></or></filter></query></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '903'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid></locationid><sessiontimestamp>2025-10-23T19:51:09+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:09+00:00</sessiontimeout></authentication><result><status>success</status><function>query</function><controlid>1759104000.0</controlid><data
+        listtype="ITEM" totalcount="3" offset="0" count="3" numremaining="0"><ITEM><RECORDNO>32</RECORDNO><ITEMID>CSS1001</ITEMID><NAME>UCME
+        4K 8MP Security System</NAME><MEGAENTITYID></MEGAENTITYID></ITEM><ITEM><RECORDNO>50</RECORDNO><ITEMID>CSS1000</ITEMID><NAME>UCME
+        4K 6MP Security System</NAME><MEGAENTITYID></MEGAENTITYID></ITEM><ITEM><RECORDNO>38</RECORDNO><ITEMID>CSS1002</ITEMID><NAME>ICU
+        Entry System</NAME><MEGAENTITYID></MEGAENTITYID></ITEM></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c47c4af1e16e-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:10 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:09 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=4Wb86U41E0s94dCWtdIXSpOlF09z3hN04kr_A5Xd8bs-1761249070-1.0.1.1-wcsTf5aLglrjrzWqSms_O0yTAo3olQ0bPsjdxCIAPLInofVpD_icFue4vNY.43nqgDTvqD8JaBaGBmv093MRcE4MJmLDVEBAKClAjVymeg8;
+        path=/; expires=Thu, 23-Oct-25 20:21:10 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '493'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.02'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '1065'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><login><userid>USER_ID</userid><companyid>hotglueMPP-DEV</companyid><password>PASSWORD</password><locationid>100</locationid></login></authentication><content><function
+      controlid="1759104000.0"><getAPISession></getAPISession></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '574'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid>100</locationid><sessiontimestamp>2025-10-23T19:51:10+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:10+00:00</sessiontimeout></authentication><result><status>success</status><function>getAPISession</function><controlid>1759104000.0</controlid><data><api><sessionid>-8DfvlaCe5MU_An1vs81UmrWkxU86P-A8mizNca2FPgJ9b7PNUIvk98U</sessionid><endpoint>https://api.intacct.com/ia/xml/xmlgw.phtml</endpoint><locationid>100</locationid></api></data></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c480ec7ff1e3-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:11 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:10 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=NQAeQmtV_eFvD7_ZZOt1MFYhRZuo.d3mg1DhxAf90mQ-1761249071-1.0.1.1-xvQWgBcBURGPRLyz7rKhIdPPt0BlcdU90pKryjLrsxKlGIehmP5Z8SFD5zicYbaJNQ97N.K71xdTrgdyB0qUDYfLO1GeGDewycRwuleZEsE;
+        path=/; expires=Thu, 23-Oct-25 20:21:11 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '572'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '812'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '<?xml version="1.0" encoding="utf-8"?>
+
+      <request><control><senderid>SENDER_ID</senderid><password>PASSWORD</password><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion><includewhitespace>false</includewhitespace></control><operation><authentication><sessionid>SESSION_ID</sessionid></authentication><content><function
+      controlid="0"><create_apadjustment><vendorid>20007</vendorid><datecreated><year>2025</year><month>10</month><day>10</day></datecreated><adjustmentno>VC-TEST-2001</adjustmentno><action>Draft</action><description>Test
+      VendorCredit Description</description><basecurr>USD</basecurr><currency>USD</currency><exchrate>1.0</exchrate><customfields><customfield><customfieldname>VC_CF_TEXT</customfieldname><customfieldvalue>some
+      value header</customfieldvalue></customfield><customfield><customfieldname>VC_CF_BOOL</customfieldname><customfieldvalue>true</customfieldvalue></customfield><customfield><customfieldname>VC_CF_NUMBER</customfieldname><customfieldvalue>125.2</customfieldvalue></customfield></customfields><apadjustmentitems><lineitem><glaccountno>10100</glaccountno><amount>-250.0</amount><memo>Item
+      line 1</memo><locationid>100</locationid><departmentid>100</departmentid><customfields><customfield><customfieldname>VC_LINE_CF_TEXT</customfieldname><customfieldvalue>some
+      value line 1</customfieldvalue></customfield><customfield><customfieldname>VC_LINE_CF_BOOL</customfieldname><customfieldvalue>false</customfieldvalue></customfield><customfield><customfieldname>VC_LINE_CF_NUMBER</customfieldname><customfieldvalue>111</customfieldvalue></customfield></customfields><itemid>CSS1000</itemid><classid>300</classid></lineitem><lineitem><glaccountno>10100</glaccountno><amount>-300.0</amount><memo>Item
+      line 2</memo><departmentid>100</departmentid><customfields><customfield><customfieldname>VC_LINE_CF_TEXT</customfieldname><customfieldvalue>some
+      value line 2</customfieldvalue></customfield><customfield><customfieldname>VC_LINE_CF_BOOL</customfieldname><customfieldvalue>true</customfieldvalue></customfield><customfield><customfieldname>VC_LINE_CF_NUMBER</customfieldname><customfieldvalue>106</customfieldvalue></customfield></customfields><itemid>CSS1001</itemid></lineitem><lineitem><glaccountno>10100</glaccountno><amount>-320.0</amount><memo>Item
+      line 3</memo><departmentid>100</departmentid><itemid>CSS1002</itemid></lineitem><lineitem><glaccountno>10100</glaccountno><amount>-125.0</amount><memo>Expense
+      line 1</memo><locationid>100</locationid><departmentid>100</departmentid><customfields><customfield><customfieldname>VC_LINE_CF_TEXT</customfieldname><customfieldvalue>some
+      value expense 1</customfieldvalue></customfield><customfield><customfieldname>VC_LINE_CF_BOOL</customfieldname><customfieldvalue>false</customfieldvalue></customfield><customfield><customfieldname>VC_LINE_CF_NUMBER</customfieldname><customfieldvalue>126</customfieldvalue></customfield></customfields><classid>300</classid></lineitem><lineitem><glaccountno>10200</glaccountno><amount>-15.0</amount><memo>Expense
+      line 2</memo><locationid>100</locationid><departmentid>100</departmentid><classid>300</classid></lineitem></apadjustmentitems></create_apadjustment></function></content></operation></request>'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3310'
+      User-Agent:
+      - python-requests/2.32.5
+      content-type:
+      - application/xml
+    method: POST
+    uri: https://api.intacct.com/ia/xml/xmlgw.phtml
+  response:
+    body:
+      string: <?xml version="1.0" encoding="UTF-8"?><response><control><status>success</status><senderid>hotglueMPP</senderid><controlid>1759104000.0</controlid><uniqueid>false</uniqueid><dtdversion>3.0</dtdversion></control><operation><authentication><status>success</status><userid>emma</userid><companyid>hotglueMPP-DEV</companyid><locationid>100</locationid><sessiontimestamp>2025-10-23T19:51:11+00:00</sessiontimestamp><sessiontimeout>2025-10-24T07:51:11+00:00</sessiontimeout></authentication><result><status>success</status><function>create_apadjustment</function><controlid>0</controlid><key>1728</key></result></operation></response>
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      CF-RAY:
+      - 9933c48759b2e851-GRU
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Language:
+      - en-US
+      Content-Security-Policy-Report-Only:
+      - 'default-src ''self'' data: https://*.grammarly.com; report-uri csp_listener.phtml;
+        script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' https://*.grammarly.com
+        ; style-src ''self'' ''unsafe-inline'' ; img-src ''self'' *.amazonaws.com
+        data: https://*.grammarly.com ; frame-src ''self'' *.intacct.com *.intacct-adv.com
+        https://www.youtube.com *.sage.com *.onetrust.com https://app.powerbi.com/
+        https://dc.services.visualstudio.com ; connect-src ''self'' *.intacct.com
+        https://*.grammarly.com https://*.grammarly.io wss://*.grammarly.com https://api.gms.development.eu-west-1.sageai.sagecloudops.com
+        https://api.gms.pre-production.eu-west-1.sageai.sagecloudops.com https://api.gms.ai.sage.com
+        ;'
+      Content-Type:
+      - text/xml; encoding="UTF-8";charset=UTF-8
+      Date:
+      - Thu, 23 Oct 2025 19:51:12 GMT
+      P3p:
+      - CP="Not a P3P policy.
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - pagePostTime=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/;
+        secure
+      - DFT_LOCALE=en_US.UTF-8; expires=Fri, 23 Oct 2026 19:51:11 GMT; Max-Age=31536000;
+        path=/; domain=intacct.com; secure; HttpOnly
+      - __cf_bm=VUZGA7oHcbdmcUGp676Caam6bxFiIYZ5vZLmp9J6k3c-1761249072-1.0.1.1-kHJfhymCFnfoVnfAzHWLYckSp0DG0BXUNedPVOT3fpiWhq2hDoqkhEZyLndCsiIFicfGYRrRd1x2NlJ5qZC1FOnNS76WEr25yN31X0i.ke4;
+        path=/; expires=Thu, 23-Oct-25 20:21:12 GMT; domain=.intacct.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin,Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Envoy-Upstream-Service-Time:
+      - '853'
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Ia-Th:
+      - '0.01'
+      X-Xss-Protection:
+      - 1; mode=block
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '628'
+    status:
+      code: 200
+      message: OK
+version: 1

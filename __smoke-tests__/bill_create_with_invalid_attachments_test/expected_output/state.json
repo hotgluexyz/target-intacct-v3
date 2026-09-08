@@ -1,0 +1,1 @@
+{"bookmarks": {"Bills": [{"success": false, "error": "Attachment file not found: ./__tests__/target/target-intacct-v3/upload_test_files/bill_attachments/TEST-BILL-V-1113/inexistent_file.json", "externalId": "EXT-TEST-BILL-1113"}]}, "summary": {"Bills": {"success": 0, "fail": 1, "existing": 0, "updated": 0}}}

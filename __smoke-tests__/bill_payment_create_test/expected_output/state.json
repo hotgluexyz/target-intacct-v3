@@ -1,0 +1,1 @@
+{"bookmarks": {"BillPayments": [{"id": "1679", "externalId": "EXT-TEST-BP-1102", "success": true}, {"id": "1680", "externalId": "EXT-TEST-BP-1103", "success": true}]}, "summary": {"BillPayments": {"success": 2, "fail": 0, "existing": 0, "updated": 0}}}
