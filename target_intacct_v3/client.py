@@ -288,8 +288,32 @@ class IntacctSink(HotglueSink):
             except (KeyError, ValueError, TypeError) as e:
                 self.logger.error(f"Failed to retrieve records: {e.__repr__()}")
                 raise FatalAPIError(f"Error while fetching records: {e.__repr__()}")
-        
+            except FatalAPIError as e:
+                if self._is_permission_denied(e):
+                    self.logger.warning(f"No permission to QUERY object type '{intacct_object}' in Intacct, treating as empty: {e}")
+                    break
+                raise
+
         return total_intacct_objects
+
+    @staticmethod
+    def _is_permission_denied(error: Exception) -> bool:
+        """Detect Intacct's 'You do not have permission for API operation QUERY on objects of type X' error.
+
+        This can fire even when we didn't directly query X (e.g. querying GLACCOUNT can trigger
+        a permission check on a linked object like checkingaccount), so callers should treat it
+        as "this lookup is unavailable" rather than a fatal, job-ending error.
+        """
+        payload = error.args[0] if error.args else None
+        intacct_errors = payload.get("error") if isinstance(payload, dict) else None
+        if isinstance(intacct_errors, dict):
+            intacct_errors = [intacct_errors]
+        if not isinstance(intacct_errors, list):
+            return False
+        return any(
+            isinstance(err, dict) and "do not have permission" in str(err.get("description2") or "").lower()
+            for err in intacct_errors
+        )
 
     def get_vendors(self):
         if IntacctSink.vendors is None:
