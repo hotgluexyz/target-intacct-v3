@@ -17,21 +17,12 @@ jobs:
         with:
           python-version: '3.10'
 
-      # Temporary pin while feature/hgi-11490 is unreleased.
-      # After that PR is released, switch this back to `pip install hotglue-smoke-test`.
-      - name: Checkout hotglue-smoke-test
-        uses: actions/checkout@v4
-        with:
-          repository: hotgluexyz/hotglue-smoke-test
-          ref: feature/hgi-11490
-          path: hotglue-smoke-test
-
       - name: Setup current repository dependencies
         run: |
           python -m venv .venv
           source .venv/bin/activate
           pip install .
-          pip install ./hotglue-smoke-test
+          pip install hotglue-smoke-test
           deactivate
 
       - name: Setup and run tests
