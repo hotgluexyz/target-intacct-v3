@@ -1,0 +1,3 @@
+{ "type": "SCHEMA", "stream": "Items", "schema": { "properties": { "id": { "type": [ "string", "null" ] }, "externalId": { "type": [ "string", "null" ] }, "itemNumber": { "type": [ "string", "null" ] }, "displayName": { "type": [ "string", "null" ] }, "type": { "type": [ "string", "null" ] }, "subsidiaryId": { "type": [ "string", "null" ] }, "subsidiaryName": { "type": [ "string", "null" ] }, "isActive": { "type": [ "boolean", "null" ] } }, "type": "object" }, "key_properties": []}
+{"type": "RECORD", "stream": "Items", "record": {"externalId": "EXT-TEST-ITEM-S9F31", "displayName": "V-TEST Item S9F31", "itemNumber": "V-TEST-Item-S9F31", "type": "Inventory", "isActive": true, "subsidiaryId": "1"}}
+{ "type": "STATE", "value": {}}
